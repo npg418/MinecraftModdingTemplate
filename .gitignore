@@ -9,6 +9,8 @@ build/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/misc.xml
+.idea/runConfigurations/
 *.iws
 *.iml
 *.ipr
@@ -40,3 +42,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Logs ###
+*.log
+
+### Minecraft ###
+**/run/
