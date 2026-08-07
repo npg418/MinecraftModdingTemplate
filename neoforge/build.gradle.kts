@@ -41,14 +41,7 @@ neoForge {
             systemProperty("forge.logging.markers", "REGISTRIES")
             logLevel = Level.DEBUG
 
-            val mixinJar = configurations.runtimeClasspath.get()
-                .copyRecursive()
-                .resolvedConfiguration
-                .resolvedArtifacts
-                .first { it.moduleVersion.id.group == "net.fabricmc" && it.moduleVersion.id.name == "sponge-mixin" }
-                .file.absolutePath
-
-            jvmArguments = listOf("-XX:+AllowEnhancedClassRedefinition", "-javaagent:$mixinJar")
+            jvmArguments.addAll(hotswapJvmArgs)
 
             ideName = "NeoForge: Run ${type.get()}"
         }

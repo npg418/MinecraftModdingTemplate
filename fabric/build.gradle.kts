@@ -6,9 +6,11 @@ plugins {
 loom {
     runs {
         configureEach {
-            jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
+            jvmArguments.addAll(hotswapJvmArgs)
+
             displayName = "Fabric: Run $name"
             appendProjectPathToDisplayName = false
+
             generateRunConfig = true
         }
     }
@@ -25,6 +27,9 @@ repositories {
     maven("https://maven.parchmentmc.org") {
         name = "ParchmentMC"
     }
+    maven("https://maven.terraformersmc.com") {
+        name = "Terraformers"
+    }
 }
 
 dependencies {
@@ -37,6 +42,7 @@ dependencies {
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.api)
     modImplementation(libs.fabric.kotlin)
+    modImplementation(libs.modmenu)
 
     implementation(projects.common)
 }
