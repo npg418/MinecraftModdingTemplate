@@ -10,7 +10,12 @@ import net.minecraft.world.level.Level
 
 class ExampleItem : Item(Properties().stacksTo(16)) {
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack?> {
-        player.displayClientMessage(Component.literal("Hello ${player.name}!"), false)
+        if (level.isClientSide) {
+            player.displayClientMessage(
+                Component.literal("Hello ").append(player.name).append(Component.literal("!")),
+                false
+            )
+        }
         return InteractionResultHolder.pass(player.getItemInHand(usedHand))
     }
 }
