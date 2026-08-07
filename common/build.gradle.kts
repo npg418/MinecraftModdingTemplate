@@ -13,7 +13,6 @@ neoForge {
     }
 }
 
-val sharedSources = configurations.register("sharedSources") {
-    isCanBeConsumed = true
-    isCanBeResolved = false
+dependencies {
+    compileOnly(libs.sponge.mixin)
 }

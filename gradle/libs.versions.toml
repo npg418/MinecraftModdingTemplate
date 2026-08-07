@@ -18,6 +18,9 @@ fabric-loom = "1.17-SNAPSHOT"
 parchment-minecraft = "1.21.1"
 parchment-mapping = "2024.11.17"
 
+# https://maven.fabricmc.net/net/fabricmc/sponge-mixin/
+sponge-mixin = "0.15.2+mixin.0.8.7"
+
 # https://projects.neoforged.net/neoforged/neoforge
 neoforge-exact = "21.1.248"
 neoforge-range = "[21,21.1]"
@@ -49,6 +52,8 @@ fabric-loom-companion = { id = "net.fabricmc.fabric-loom-companion", version.ref
 
 [libraries]
 idea-ext = { group = "org.jetbrains.gradle.plugin.idea-ext", name = "org.jetbrains.gradle.plugin.idea-ext.gradle.plugin", version.ref = "idea-ext" }
+
+sponge-mixin = { group = "net.fabricmc", name = "sponge-mixin", version.ref = "sponge-mixin" }
 
 minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft-exact" }
 

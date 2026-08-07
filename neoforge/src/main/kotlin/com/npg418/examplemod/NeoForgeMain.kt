@@ -11,7 +11,7 @@ import net.neoforged.neoforge.registries.DeferredRegister
 
 
 @Mod(ExampleMod.MODID)
-class NeoforgeMain(eventBus: IEventBus, container: ModContainer) {
+class NeoForgeMain(eventBus: IEventBus, container: ModContainer) {
     companion object {
         val ITEMS: DeferredRegister.Items = DeferredRegister.createItems(ExampleMod.MODID)
     }
