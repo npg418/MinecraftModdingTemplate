@@ -36,6 +36,9 @@ fabric-api-range = "*"
 fabric-kotlin-exact = "1.13.13+kotlin.2.4.10"
 fabric-kotlin-range = ">=1.13.13"
 
+# https://modrinth.com/mod/modmenu/versions?l=fabric
+modmenu-exact = "11.0.4"
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 idea-ext = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "idea-ext" }
@@ -54,3 +57,5 @@ kotlinforforge = { group = "thedarkcolour", name = "kotlinforforge-neoforge", ve
 fabric-loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric-loader-exact" }
 fabric-api = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fabric-api" }
 fabric-kotlin = { group = "net.fabricmc", name = "fabric-language-kotlin", version.ref = "fabric-kotlin-exact" }
+
+modmenu = { group = "com.terraformersmc", name = "modmenu", version.ref = "modmenu-exact" }

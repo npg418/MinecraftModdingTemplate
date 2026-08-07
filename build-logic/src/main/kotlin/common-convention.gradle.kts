@@ -18,8 +18,23 @@ java.toolchain {
     vendor = JvmVendorSpec.JETBRAINS
 }
 
+val hotswapJvmArgs = provider {
+    val mixinJar = configurations.runtimeClasspath.get()
+        .copyRecursive()
+        .resolvedConfiguration
+        .resolvedArtifacts
+        .first { it.moduleVersion.id.group == "net.fabricmc" && it.moduleVersion.id.name == "sponge-mixin" }
+        .file.absolutePath
+
+    listOf(
+        "-XX:+AllowEnhancedClassRedefinition",
+        "-javaagent:$mixinJar"
+    )
+}
+extensions.add<Provider<List<String>>>("hotswapJvmArgs", hotswapJvmArgs)
+
 val extraModProperties: MapProperty<String, String> = objects.mapProperty(String::class, String::class)
-extensions.add(typeOf<MapProperty<String, String>>(), "extraModProperties", extraModProperties)
+extensions.add<MapProperty<String, String>>("extraModProperties", extraModProperties)
 
 val baseProperties = provider {
     listOf(
