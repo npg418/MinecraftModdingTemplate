@@ -1,0 +1,69 @@
+import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.jetbrains.gradle.ext.settings
+import org.jetbrains.gradle.ext.taskTriggers
+
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+    idea
+}
+
+group = providers.gradleProperty("mod_group_id").get()
+version = providers.gradleProperty("mod_version").get()
+
+base.archivesName = providers.gradleProperty("mod_id")
+
+java.toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+    @Suppress("UnstableApiUsage")
+    vendor = JvmVendorSpec.JETBRAINS
+}
+
+val extraModProperties: MapProperty<String, String> = objects.mapProperty(String::class, String::class)
+extensions.add(typeOf<MapProperty<String, String>>(), "extraModProperties", extraModProperties)
+
+val baseProperties = provider {
+    listOf(
+        "mod_id",
+        "mod_name",
+        "mod_description",
+        "mod_authors",
+        "mod_license",
+        "mod_version",
+        "mod_group_id"
+    ).associateWith { providers.gradleProperty(it).get() }
+}
+
+val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {
+    description = "Generate mod metadata file from template"
+
+    val replaceProperties = baseProperties.get() + extraModProperties.get()
+
+    inputs.properties(replaceProperties)
+    expand(replaceProperties)
+
+    from("src/main/templates")
+    into(layout.buildDirectory.dir("generated/sources/modMetadata"))
+}
+
+sourceSets.main {
+    resources.srcDir(generateModMetadata)
+    resources.srcDir("src/generated/resources")
+}
+
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
+    }
+}
+
+rootProject.pluginManager.apply(libs.plugins.idea.ext.get().pluginId)
+rootProject.extensions.configure<IdeaModel> {
+    project {
+        settings {
+            taskTriggers {
+                beforeSync(generateModMetadata)
+            }
+        }
+    }
+}

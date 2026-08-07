@@ -1,2 +1,3 @@
-group = "com.npg418.template"
-version = libs.versions.mod.get()
+plugins {
+    alias(libs.plugins.idea.ext)
+}
