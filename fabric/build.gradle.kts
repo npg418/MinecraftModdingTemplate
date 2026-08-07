@@ -4,6 +4,8 @@ plugins {
 }
 
 loom {
+    log4jConfigs.from("log4j-dev.xml")
+
     runs {
         configureEach {
             jvmArguments.addAll(hotswapJvmArgs)

@@ -48,3 +48,4 @@ bin/
 
 ### Minecraft ###
 **/run/
+**/generated/**/.cache/
