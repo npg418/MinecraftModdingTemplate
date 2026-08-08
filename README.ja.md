@@ -1,5 +1,7 @@
 # NPG418's Minecraft modding template
 
+[English](./README.md) | [日本語](./README.ja.md)
+
 [Gradle](https://gradle.org/) + [Kotlin](https://kotlinlang.org/) + [Version catalogs](https://docs.gradle.org/current/userguide/version_catalogs.html)
 を使用したマルチローダー対応のModding用テンプレートです。
 
