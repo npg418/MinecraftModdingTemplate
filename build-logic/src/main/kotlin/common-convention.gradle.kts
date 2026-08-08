@@ -60,6 +60,15 @@ val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata"
     into(layout.buildDirectory.dir("generated/sources/modMetadata"))
 }
 
+val cleanModMetadataOnFailure = tasks.register<Delete>("cleanModMetadataOnFailure") {
+    description = "Delete generated mod metadata on failure"
+
+    onlyIf { (generateModMetadata.get().state.failure as Throwable?) != null }
+    delete(generateModMetadata.map { it.outputs.files })
+}
+
+generateModMetadata.configure { finalizedBy(cleanModMetadataOnFailure) }
+
 sourceSets.main {
     resources.srcDir(generateModMetadata)
     resources.srcDir("src/generated/resources")
