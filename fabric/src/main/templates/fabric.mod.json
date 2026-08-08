@@ -14,6 +14,12 @@
         "adapter": "kotlin",
         "value": "com.npg418.examplemod.FabricMain"
       }
+    ],
+    "fabric-datagen": [
+      {
+        "adapter": "kotlin",
+        "value": "com.npg418.examplemod.datagen.ExampleModDataGenerator"
+      }
     ]
   },
   "mixins": [

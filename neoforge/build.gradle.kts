@@ -5,6 +5,14 @@ plugins {
     alias(libs.plugins.moddev.gradle)
 }
 
+extraModProperties.putAll(
+    mapOf(
+        "loader_version_range" to libs.versions.kotlinforforge.range.get(),
+        "neoforge_version_range" to libs.versions.neoforge.range.get(),
+        "minecraft_version_range" to libs.versions.minecraft.range.neoforge.get()
+    )
+)
+
 neoForge {
     version = libs.versions.neoforge.exact.get()
 
@@ -24,7 +32,7 @@ neoForge {
             systemProperty("neoforge.enabledGameTestNamespaces", providers.gradleProperty("mod_id").get())
         }
 
-        create("data") {
+        create("datagen") {
             data()
             programArguments.addAll(
                 "--mod",
@@ -66,11 +74,3 @@ dependencies {
 
     implementation(projects.common)
 }
-
-extraModProperties.putAll(
-    mapOf(
-        "loader_version_range" to libs.versions.kotlinforforge.range.get(),
-        "neoforge_version_range" to libs.versions.neoforge.range.get(),
-        "minecraft_version_range" to libs.versions.minecraft.range.neoforge.get()
-    )
-)
