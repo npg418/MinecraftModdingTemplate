@@ -3,6 +3,22 @@ plugins {
     alias(libs.plugins.fabric.loom)
 }
 
+extraModProperties.putAll(
+    mapOf(
+        "fabric_loader_version_range" to libs.versions.fabric.loader.range.get(),
+        "minecraft_version_range" to libs.versions.minecraft.range.fabric.get(),
+        "java_version_range" to ">=${java.toolchain.languageVersion.get()}",
+        "fabric_api_version_range" to libs.versions.fabric.api.range.get(),
+        "fabric_kotlin_version_range" to libs.versions.fabric.kotlin.range.get(),
+    )
+)
+
+fabricApi {
+    configureDataGeneration {
+        client = true
+    }
+}
+
 loom {
     log4jConfigs.from("log4j-dev.xml")
 
@@ -48,13 +64,3 @@ dependencies {
 
     implementation(projects.common)
 }
-
-extraModProperties.putAll(
-    mapOf(
-        "fabric_loader_version_range" to libs.versions.fabric.loader.range.get(),
-        "minecraft_version_range" to libs.versions.minecraft.range.fabric.get(),
-        "java_version_range" to ">=${java.toolchain.languageVersion.get()}",
-        "fabric_api_version_range" to libs.versions.fabric.api.range.get(),
-        "fabric_kotlin_version_range" to libs.versions.fabric.kotlin.range.get(),
-    )
-)
