@@ -1,6 +1,7 @@
 package com.npg418.examplemod.mixin;
 
 import com.npg418.examplemod.ExampleMod;
+import com.npg418.examplemod.config.CommonConfig;
 import net.minecraft.client.gui.screens.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class TitleScreenMixin {
     @Inject(method = "init", at = @At("HEAD"))
     private void init(CallbackInfo ci) {
-        ExampleMod.Companion.getLOGGER().debug("Hello from TitleScreenMixin!");
+        if (CommonConfig.INSTANCE.getGreetOnTitleScreen().get()) {
+            ExampleMod.INSTANCE.getLOGGER().debug("Hello from TitleScreenMixin!");
+        }
     }
 }
