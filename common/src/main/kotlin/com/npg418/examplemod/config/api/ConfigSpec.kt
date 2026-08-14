@@ -9,18 +9,14 @@ enum class ConfigType {
     STARTUP
 }
 
-sealed interface ConfigNode
+sealed class ConfigNode {
+    open var comment: String? = null
+    open var translation: String? = null
+}
 
-open class ConfigEntry<T : Any>(val default: T) : ConfigNode {
-    var comment: String? = null
-    var translationKey: String? = null
-
+open class ConfigEntry<T : Any>(val default: T) : ConfigNode() {
     @Volatile
-    private var source = { default }
-
-    internal fun bindTo(binder: ConfigBinder) {
-        source = binder.source(this)
-    }
+    var source = { default }
 
     fun get() = source()
     operator fun getValue(thisRef: Any?, property: KProperty<*>) = get()
@@ -28,8 +24,8 @@ open class ConfigEntry<T : Any>(val default: T) : ConfigNode {
 
 class RangedConfigEntry<T : Comparable<T>>(default: T, val range: ClosedRange<T>) : ConfigEntry<T>(default)
 
-open class ConfigSection internal constructor(private val name: String) : ConfigNode {
-    private val children = linkedMapOf<String, ConfigNode>()
+open class ConfigSection internal constructor(private val name: String) : ConfigNode() {
+    val children = linkedMapOf<String, ConfigNode>()
 
     protected fun <T : Any> define(
         name: String,
@@ -55,5 +51,4 @@ open class ConfigSection internal constructor(private val name: String) : Config
 
 abstract class ConfigSpec(val modId: String, val type: ConfigType) : ConfigSection("") {
     val baseFileName get() = "$modId-${type.name.lowercase()}"
-
 }
