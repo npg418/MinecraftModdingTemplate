@@ -51,7 +51,7 @@ neoForge {
 
             jvmArguments.addAll(hotswapJvmArgs)
 
-            ideName = "NeoForge: Run ${type.get()}"
+            ideName = "NeoForge: Run $name"
         }
     }
 
