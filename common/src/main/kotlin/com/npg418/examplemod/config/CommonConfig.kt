@@ -1,15 +1,16 @@
 package com.npg418.examplemod.config
 
 import com.npg418.examplemod.ExampleMod
+import com.npg418.examplemod.config.api.ConfigSection
+import com.npg418.examplemod.config.api.ConfigSpec
+import com.npg418.examplemod.config.api.ConfigType
 
 object CommonConfig : ConfigSpec(ExampleMod.MODID, ConfigType.COMMON) {
-    object GreetingSection : ConfigSection(this, "greeting") {
-        val greetOnTitleScreen: ConfigEntry<Boolean> = define(
-            "greetOnTitleScreen",
-            true,
-            "Whether log when title screen"
-        )
+    class GreetingSection : ConfigSection("greeting") {
+        val greetOnTitleScreen by define("greetOnTitleScreen", true) {
+            comment = "Whether log when title screen"
+        }
     }
 
-    val greeting = GreetingSection
+    val greeting = section(::GreetingSection)
 }

@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 
 class ExampleItem :
-    Item(Properties().stacksTo(1).durability(StartupConfig.item.exampleItemDurability.get())) {
+    Item(Properties().stacksTo(1).durability(StartupConfig.item.exampleItemDurability)) {
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack?> {
         val stack = player.getItemInHand(usedHand)
         if (level.isClientSide) {
