@@ -1,6 +1,6 @@
 package com.npg418.examplemod.items
 
-import com.npg418.examplemod.config.CommonConfig
+import com.npg418.examplemod.config.StartupConfig
 import net.minecraft.network.chat.Component
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResultHolder
@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 
 class ExampleItem :
-    Item(Properties().stacksTo(1).durability(CommonConfig.ItemSection.exampleItemDurability.get())) {
+    Item(Properties().stacksTo(1).durability(StartupConfig.item.exampleItemDurability.get())) {
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack?> {
         val stack = player.getItemInHand(usedHand)
         if (level.isClientSide) {

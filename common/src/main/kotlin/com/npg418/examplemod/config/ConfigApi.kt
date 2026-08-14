@@ -78,8 +78,6 @@ abstract class ConfigSpec(val modId: String, val type: ConfigType) : ConfigConta
 
     override val path: List<String> = emptyList()
     override val root: ConfigSpec get() = this
-
-    fun bind(binder: ConfigBinder) = entries.forEach { it.bindTo(binder) }
 }
 
 abstract class ConfigSection(
