@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class TitleScreenMixin {
     @Inject(method = "init", at = @At("HEAD"))
     private void init(CallbackInfo ci) {
-        if (CommonConfig.INSTANCE.getGreeting().getGreetOnTitleScreen().get()) {
+        if (CommonConfig.INSTANCE.getGreeting().getGreetOnTitleScreen()) {
             ExampleMod.INSTANCE.getLOGGER().debug("Hello from TitleScreenMixin!");
         }
     }
