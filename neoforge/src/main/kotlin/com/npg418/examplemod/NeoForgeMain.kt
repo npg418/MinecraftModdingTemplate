@@ -2,6 +2,7 @@ package com.npg418.examplemod
 
 import com.npg418.examplemod.config.NeoForgeConfigBuilder
 import com.npg418.examplemod.datagen.ModItemModelProvider
+import com.npg418.examplemod.datagen.ModLanguageProvider
 import com.npg418.examplemod.init.CONFIGS
 import com.npg418.examplemod.init.ITEM_MAP
 import net.neoforged.bus.api.IEventBus
@@ -38,6 +39,10 @@ class NeoForgeMain(eventBus: IEventBus, container: ModContainer) {
         generator.addProvider(
             event.includeClient(),
             ModItemModelProvider(output, existingFileHelper)
+        )
+        generator.addProvider(
+            event.includeClient(),
+            ModLanguageProvider(output)
         )
     }
 }
