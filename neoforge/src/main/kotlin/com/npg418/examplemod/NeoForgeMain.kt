@@ -1,6 +1,8 @@
 package com.npg418.examplemod
 
+import com.npg418.examplemod.config.NeoForgeConfigBuilder
 import com.npg418.examplemod.datagen.ModItemModelProvider
+import com.npg418.examplemod.init.CONFIGS
 import com.npg418.examplemod.init.ITEM_MAP
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.bus.api.SubscribeEvent
@@ -23,6 +25,8 @@ class NeoForgeMain(eventBus: IEventBus, container: ModContainer) {
 
         ITEM_MAP.forEach(ITEMS::register)
         ITEMS.register(eventBus)
+
+        CONFIGS.forEach { NeoForgeConfigBuilder(it).register(container) }
     }
 
     @SubscribeEvent
