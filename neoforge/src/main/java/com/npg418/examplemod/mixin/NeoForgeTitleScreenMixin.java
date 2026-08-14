@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class NeoForgeTitleScreenMixin {
     @Inject(method = "init", at = @At("HEAD"))
     private void init(CallbackInfo ci) {
-        if (NeoForgeCommonConfig.INSTANCE.getGreetOnTitleScreenNeoforge().get()) {
+        if (NeoForgeCommonConfig.INSTANCE.getGreeting().getNeoForgeGreetOnTitleScreen().get()) {
             ExampleMod.INSTANCE.getLOGGER().debug("Hello from NeoForgeTitleScreenMixin!");
         }
     }
