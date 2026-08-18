@@ -15,26 +15,25 @@ fun ConfigType.toModConfigType(): ModConfig.Type = when (this) {
 class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
     private val builder = ModConfigSpec.Builder()
 
-    init {
-        bindSection(spec)
-    }
-
     fun register(container: ModContainer) {
+        bindSection(spec)
         container.registerConfig(spec.type.toModConfigType(), builder.build(), "${spec.baseFileName}.toml")
     }
 
     private fun <T : Any> bindEntry(name: String, entry: ConfigEntry<T>) {
-        entry.source = builder.define(name, entry.default)::get
+        entry.set(builder.define(name, entry.default)::get)
     }
 
     private fun <T : Comparable<T>> bindRangedEntry(name: String, entry: RangedConfigEntry<T>) {
-        entry.source = builder.defineInRange(
-            name,
-            entry.default,
-            entry.range.start,
-            entry.range.endInclusive,
-            entry.default.javaClass
-        )::get
+        entry.set(
+            builder.defineInRange(
+                name,
+                entry.default,
+                entry.range.start,
+                entry.range.endInclusive,
+                entry.default.javaClass
+            )::get
+        )
     }
 
 

@@ -10,45 +10,46 @@ enum class ConfigType {
 }
 
 sealed class ConfigNode {
-    open var comment: String? = null
-    open var translation: String? = null
+    var comment: String? = null
+    var translation: String? = null
 }
 
-open class ConfigEntry<T : Any>(val default: T) : ConfigNode() {
+open class ConfigEntry<T : Any> internal constructor(val name: String, val default: T) : ConfigNode() {
     @Volatile
-    var source = { default }
+    private var source = { default }
 
     fun get() = source()
     operator fun getValue(thisRef: Any?, property: KProperty<*>) = get()
+
+    fun set(newSource: () -> T) {
+        source = newSource
+    }
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, newSource: () -> T) = set(newSource)
 }
 
-class RangedConfigEntry<T : Comparable<T>>(default: T, val range: ClosedRange<T>) : ConfigEntry<T>(default)
+class RangedConfigEntry<T : Comparable<T>> internal constructor(
+    name: String,
+    default: T,
+    val range: ClosedRange<T>
+) : ConfigEntry<T>(name, default)
 
-open class ConfigSection internal constructor(private val name: String) : ConfigNode() {
+abstract class ConfigSection : ConfigNode() {
     val children = linkedMapOf<String, ConfigNode>()
 
-    protected fun <T : Any> define(
-        name: String,
-        default: T,
-        block: (ConfigEntry<T>.() -> Unit)? = null
-    ) = ConfigEntry(default).apply { block?.invoke(this) }.also {
-        children[name] = it
-    }
+    protected fun <T : Any> define(name: String, default: T, block: (ConfigEntry<T>.() -> Unit)? = null) =
+        ConfigEntry(name, default).apply { block?.invoke(this) }.also { children[name] = it }
 
     protected fun <T : Comparable<T>> defineInRange(
         name: String,
         default: T,
         range: ClosedRange<T>,
-        block: (RangedConfigEntry<T>.() -> Unit)? = null
-    ) = RangedConfigEntry(default, range).apply { block?.invoke(this) }.also {
-        children[name] = it
-    }
+        block: (ConfigEntry<T>.() -> Unit)? = null
+    ) = RangedConfigEntry(name, default, range).apply { block?.invoke(this) }.also { children[name] = it }
 
-    protected fun <S : ConfigSection> section(constructor: () -> S) = constructor().also {
-        children[it.name] = it
-    }
+    protected fun <T : ConfigSection> section(name: String, factory: () -> T, block: (T.() -> Unit)? = null) =
+        factory().apply { block?.invoke(this) }.also { children[name] = it }
 }
 
-abstract class ConfigSpec(val modId: String, val type: ConfigType) : ConfigSection("") {
+abstract class ConfigSpec(val modId: String, val type: ConfigType) : ConfigSection() {
     val baseFileName get() = "$modId-${type.name.lowercase()}"
 }

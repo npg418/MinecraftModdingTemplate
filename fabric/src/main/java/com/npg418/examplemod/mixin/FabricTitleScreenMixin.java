@@ -11,6 +11,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class FabricTitleScreenMixin {
     @Inject(method = "init", at = @At("HEAD"))
     private void init(CallbackInfo ci) {
-        ExampleMod.Companion.getLOGGER().debug("Hello from FabricTitleScreenMixin!");
+        ExampleMod.INSTANCE.getLOGGER().debug("Hello from FabricTitleScreenMixin!");
     }
 }
