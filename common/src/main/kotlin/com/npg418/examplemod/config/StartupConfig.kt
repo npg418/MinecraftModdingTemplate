@@ -6,11 +6,11 @@ import com.npg418.examplemod.config.api.ConfigSpec
 import com.npg418.examplemod.config.api.ConfigType
 
 object StartupConfig : ConfigSpec(ExampleMod.MODID, ConfigType.STARTUP) {
-    class ItemSection : ConfigSection("item") {
+    class ItemSection : ConfigSection() {
         val exampleItemDurability by defineInRange("exampleItemDurability", 64, 1..Int.MAX_VALUE) {
             comment = "Durability of Example Item"
         }
     }
 
-    val item = section(::ItemSection)
+    val item = section("item", ::ItemSection)
 }

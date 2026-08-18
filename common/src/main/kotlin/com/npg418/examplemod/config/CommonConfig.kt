@@ -6,12 +6,13 @@ import com.npg418.examplemod.config.api.ConfigSpec
 import com.npg418.examplemod.config.api.ConfigType
 
 object CommonConfig : ConfigSpec(ExampleMod.MODID, ConfigType.COMMON) {
-    class GreetingSection : ConfigSection("greeting") {
-        override var comment: String? = "Greeting log settings"
+    class GreetingSection : ConfigSection() {
         val greetOnTitleScreen by define("greetOnTitleScreen", true) {
             comment = "Whether log when title screen"
         }
     }
 
-    val greeting = section(::GreetingSection)
+    val greeting = section("greeting", ::GreetingSection) {
+        comment = "Greeting log settings"
+    }
 }

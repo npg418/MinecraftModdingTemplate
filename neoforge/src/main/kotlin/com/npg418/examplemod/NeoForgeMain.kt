@@ -24,10 +24,10 @@ class NeoForgeMain(eventBus: IEventBus, container: ModContainer) {
 
         eventBus.register(this)
 
+        CONFIGS.forEach { NeoForgeConfigBuilder(it).register(container) }
+
         ITEM_MAP.forEach(ITEMS::register)
         ITEMS.register(eventBus)
-
-        CONFIGS.forEach { NeoForgeConfigBuilder(it).register(container) }
     }
 
     @SubscribeEvent
