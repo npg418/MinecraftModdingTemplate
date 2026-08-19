@@ -1,10 +1,7 @@
 package com.npg418.examplemod.config
 
 import com.npg418.examplemod.ExampleMod
-import com.npg418.examplemod.config.api.ConfigEntry
-import com.npg418.examplemod.config.api.ConfigNode
-import com.npg418.examplemod.config.api.ConfigSection
-import com.npg418.examplemod.config.api.ConfigSpec
+import com.npg418.examplemod.config.api.*
 import kotlinx.serialization.json.*
 import net.fabricmc.loader.api.FabricLoader
 import java.nio.file.Files
@@ -24,34 +21,46 @@ class FabricConfigBuilder(private val spec: ConfigSpec) {
         val children = jsonObject.toMutableMap()
         for ((name, node) in section.children) {
             val existing = children[name]
-            when (node) {
-                is ConfigEntry<*> -> {
-                    if (existing is JsonPrimitive) {
-                        node.set { fromJsonElement(node.default, existing) }
-                    } else {
-                        children[name] = toJsonElement(node)
-                    }
-                }
-
-                is ConfigSection -> children[name] =
-                    bindSection(node, existing as? JsonObject ?: JsonObject(emptyMap()))
+            children[name] = when (node) {
+                is RangedConfigEntry<*> -> bindRangedEntry(existing, node)
+                is ConfigEntry<*> -> bindEntry(existing, node)
+                is ConfigSection -> bindSection(node, existing as? JsonObject ?: JsonObject(emptyMap()))
             }
         }
         return JsonObject(children)
     }
 
-    private fun <T : Any> fromJsonElement(default: T, primitive: JsonPrimitive): T {
-        if (primitive is JsonNull) return default
+    private fun <T : Comparable<T>> bindRangedEntry(existing: JsonElement?, entry: RangedConfigEntry<T>): JsonElement {
+        val parsed = fromJsonElement(entry.default, existing)
+        val value = parsed.coerceIn(entry.range)
+        if (value != parsed) {
+            ExampleMod.LOGGER.warn("Config value {} is out of range. (Range: {}) Value clamped to {}.", entry.name, entry.range, value)
+        }
+        entry.set { value }
+        return toJsonElement(entry)
+    }
+
+    private fun <T : Any> bindEntry(
+        existing: JsonElement?,
+        entry: ConfigEntry<T>
+    ): JsonElement {
+        val value = fromJsonElement(entry.default, existing)
+        entry.set { value }
+        return toJsonElement(entry)
+    }
+
+    private fun <T : Any> fromJsonElement(default: T, element: JsonElement?): T {
+        if (element == null || element !is JsonPrimitive || element is JsonNull) return default
 
         @Suppress("UNCHECKED_CAST")
         return when (default) {
-            is Boolean -> primitive.boolean
-            is Int -> primitive.int
-            is Long -> primitive.long
-            is Double -> primitive.double
-            is Float -> primitive.float
-            is String -> primitive.content
-            is Enum<*> -> default.javaClass.enumConstants.firstOrNull { it.name == primitive.content } ?: default
+            is Boolean -> element.boolean
+            is Int -> element.int
+            is Long -> element.long
+            is Double -> element.double
+            is Float -> element.float
+            is String -> element.content
+            is Enum<*> -> default.javaClass.enumConstants.firstOrNull { it.name.equals(element.content, ignoreCase = true) } ?: default
             else -> throw IllegalArgumentException("Unsupported config value type: ${default::class.simpleName}")
         } as T
     }

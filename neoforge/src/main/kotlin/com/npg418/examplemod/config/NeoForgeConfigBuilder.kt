@@ -24,7 +24,7 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
         entry.set(builder.define(name, entry.default)::get)
     }
 
-    private fun <T : Comparable<T>> bindRangedEntry(name: String, entry: RangedConfigEntry<T>) {
+    private fun  bindRangedEntry(name: String, entry: RangedConfigEntry<*>) {
         entry.set(
             builder.defineInRange(
                 name,
@@ -36,6 +36,10 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
         )
     }
 
+    private fun bindEnumEntry(name: String, entry: EnumConfigEntry<*>) {
+        entry.set(builder.defineEnum(name, entry.default)::get)
+    }
+
 
     private fun bindSection(section: ConfigSection) {
         for ((name, node) in section.children) {
@@ -43,6 +47,7 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
             node.translation?.let(builder::translation)
             when (node) {
                 is RangedConfigEntry<*> -> bindRangedEntry(name, node)
+                is EnumConfigEntry<*> -> bindEnumEntry(name, node)
                 is ConfigEntry<*> -> bindEntry(name, node)
                 is ConfigSection -> {
                     builder.push(name)
