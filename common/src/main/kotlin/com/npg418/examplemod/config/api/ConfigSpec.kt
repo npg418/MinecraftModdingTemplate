@@ -36,6 +36,7 @@ class RangedConfigEntry<T : Comparable<T>> internal constructor(
 
 class EnumConfigEntry<T : Enum<T>> internal constructor(name: String, default: T) : ConfigEntry<T>(name, default)
 
+@Suppress("SameParameterValue")
 abstract class ConfigSection : ConfigNode() {
     val children = linkedMapOf<String, ConfigNode>()
 
