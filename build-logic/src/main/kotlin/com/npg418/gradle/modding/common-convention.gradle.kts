@@ -1,3 +1,6 @@
+package com.npg418.gradle.modding
+
+import libs
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.gradle.ext.settings
 import org.jetbrains.gradle.ext.taskTriggers
@@ -13,7 +16,7 @@ version = providers.gradleProperty("mod_version").get()
 base.archivesName = providers.gradleProperty("mod_id")
 
 java.toolchain {
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = providers.gradleProperty("java_version").map { JavaLanguageVersion.of(it) }
     @Suppress("UnstableApiUsage")
     vendor = JvmVendorSpec.JETBRAINS
 }
@@ -33,10 +36,7 @@ val hotswapJvmArgs = provider {
 }
 extensions.add<Provider<List<String>>>("hotswapJvmArgs", hotswapJvmArgs)
 
-val extraModProperties: MapProperty<String, String> = objects.mapProperty(String::class, String::class)
-extensions.add<MapProperty<String, String>>("extraModProperties", extraModProperties)
-
-val baseProperties = provider {
+val expandProperties = objects.mapProperty<String, String>().apply {
     listOf(
         "mod_id",
         "mod_name",
@@ -45,16 +45,17 @@ val baseProperties = provider {
         "mod_license",
         "mod_version",
         "mod_group_id"
-    ).associateWith { providers.gradleProperty(it).get() }
+    ).forEach { put(it, providers.gradleProperty(it)) }
 }
+extensions.add<MapProperty<String, String>>("expandProperties", expandProperties)
 
 val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {
     description = "Generate mod metadata file from template"
 
-    val replaceProperties = baseProperties.get() + extraModProperties.get()
-
-    inputs.properties(replaceProperties)
-    expand(replaceProperties)
+    expandProperties.get().let {
+        inputs.properties(it)
+        expand(it)
+    }
 
     from("src/main/templates")
     into(layout.buildDirectory.dir("generated/sources/modMetadata"))

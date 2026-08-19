@@ -1,0 +1,13 @@
+[versions]
+minecraft-range = "[1.21,1.21.1]"
+
+# https://projects.neoforged.net/neoforged/neoforge
+neoforge = "21.1.248"
+neoforge-range = "[21,21.1]"
+
+# https://docs.google.com/spreadsheets/d/1v8K90PBa5qPFrlHBA8PSqlBTYCcp078o5E2XQbt5BUs/edit?usp=sharing
+kotlinforforge = "5.10.0"
+kotlinforforge-range = "[5.10,6)"
+
+[libraries]
+kotlinforforge = { group = "thedarkcolour", name = "kotlinforforge-neoforge", version.ref = "kotlinforforge" }
