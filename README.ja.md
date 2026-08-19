@@ -17,11 +17,11 @@
 ## 使い方
 
 1. [settings.gradle.kts](./settings.gradle.kts)の`rootProject.name`を各プロジェクトの名前に置き換える
-2. [gradle.properties](./gradle.properties)内のMod情報(`mod_id`, `mod_group`, `mod_name`, `mod_version`,
+2. [gradle.properties](./gradle.properties)内のMod情報(`mod_id`, `mod_group_id`, `mod_name`, `mod_version`,
    `mod_description`, etc.)を更新する
 3. `common`、`neoforge`、`fabric` 全体にわたるベースパッケージ（`com.npg418.examplemod`）を自分のModのパッケージにリネームする
-4. 各ローダーサブプロジェクトのリソース配下にある `mods.toml` / `fabric.mod.json` テンプレートを自分のModのメタデータで更新する
-5. 必要に応じて[`gradle/libs.versions.toml`](./gradle/libs.versions.toml)の依存バージョンを調整する
+4. 各ローダーのメタデータテンプレートを自分のModのメタデータで更新する
+5. 必要に応じて[`gradle/`](./gradle)配下のVersion Catalogの依存バージョンを調整する
 6. （任意）fabricプロジェクトでデバッグログを有効にしたい場合は、`fabric/log4j-dev.xml`にあるlog4j設定ファイルを更新する
 7. Edit'n'Fun!
 
@@ -44,13 +44,16 @@
 ├── neoforge/         # NeoForge固有のエントリーポイントとコード
 ├── fabric/           # Fabric固有のエントリーポイントとコード
 ├── gradle/
-│   └── libs.versions.toml  # 一元管理されたVersion Catalog
+│   ├── libs.versions.toml         # 共通Version Catalog
+│   ├── neoforgeLibs.versions.toml # NeoForge用Version Catalog
+│   └── fabricLibs.versions.toml   # Fabric用Version Catalog
+├── gradle.properties # Modメタデータおよびビルド設定
 └── settings.gradle.kts
 ```
 
 ## Version Catalog
 
-依存関係とプラグインのバージョンは `gradle/libs.versions.toml` に一元管理されており、ルートビルドと`build-logic` の両方からタイプセーフなアクセサ（`libs.xxx`）を通じて利用されます。`build-logic` 内のコンベンションプラグインは、各ローダーサブプロジェクトに共通設定（Javaツールチェーン、リポジトリ、共通依存関係）を適用し、ローダーごとの`build.gradle.kts`を最小限に保ちます。
+依存関係とプラグインのバージョンは `gradle/` 配下のVersion Catalogに分離して管理されており、ルートビルドや各サブプロジェクト、`build-logic` から利用されます。`build-logic` 内のコンベンションプラグインは、各ローダーサブプロジェクトに共通設定（Javaツールチェーン、リポジトリ、共通依存関係）を適用し、ローダーごとの`build.gradle.kts`を最小限に保ちます。
 
 ## ライセンス
 
