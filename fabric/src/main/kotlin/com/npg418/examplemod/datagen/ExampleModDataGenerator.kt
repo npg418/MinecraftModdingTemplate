@@ -7,5 +7,6 @@ class ExampleModDataGenerator : DataGeneratorEntrypoint {
     override fun onInitializeDataGenerator(fabricDataGenerator: FabricDataGenerator) {
         val pack = fabricDataGenerator.createPack()
         pack.addProvider(::ModModelProvider)
+        pack.addProvider(::ModLanguageProvider)
     }
 }
