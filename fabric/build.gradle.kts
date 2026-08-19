@@ -3,15 +3,13 @@ plugins {
     alias(libs.plugins.fabric.loom)
 }
 
-extraModProperties.putAll(
-    mapOf(
-        "fabric_loader_version_range" to libs.versions.fabric.loader.range.get(),
-        "minecraft_version_range" to libs.versions.minecraft.range.fabric.get(),
-        "java_version_range" to ">=${java.toolchain.languageVersion.get()}",
-        "fabric_api_version_range" to libs.versions.fabric.api.range.get(),
-        "fabric_kotlin_version_range" to libs.versions.fabric.kotlin.range.get(),
-    )
-)
+expandProperties {
+    put("fabric_loader_version_range", fabricLibs.versions.fabric.loader.range)
+    put("minecraft_version_range", fabricLibs.versions.minecraft.range)
+    put("java_version_range", java.toolchain.languageVersion.map { ">=$it" })
+    put("fabric_api_version_range", fabricLibs.versions.fabric.api.range)
+    put("fabric_kotlin_version_range", fabricLibs.versions.fabric.kotlin.range)
+}
 
 fabricApi {
     configureDataGeneration {
@@ -51,16 +49,17 @@ repositories {
 }
 
 dependencies {
+    implementation(projects.common)
+
     minecraft(libs.minecraft)
     @Suppress("UnstableApiUsage")
     mappings(loom.layered {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.minecraft.get()}:${libs.versions.parchment.mapping.get()}@zip")
     })
-    modImplementation(libs.fabric.loader)
-    modImplementation(libs.fabric.api)
-    modImplementation(libs.fabric.kotlin)
-    modImplementation(libs.modmenu)
+    modImplementation(fabricLibs.fabric.loader)
+    modImplementation(fabricLibs.fabric.api)
+    modImplementation(fabricLibs.fabric.kotlin)
 
-    implementation(projects.common)
+    modImplementation(fabricLibs.modmenu)
 }

@@ -5,16 +5,14 @@ plugins {
     alias(libs.plugins.moddev.gradle)
 }
 
-extraModProperties.putAll(
-    mapOf(
-        "loader_version_range" to libs.versions.kotlinforforge.range.get(),
-        "neoforge_version_range" to libs.versions.neoforge.range.get(),
-        "minecraft_version_range" to libs.versions.minecraft.range.neoforge.get()
-    )
-)
+expandProperties {
+    put("loader_version_range", neoforgeLibs.versions.kotlinforforge.range)
+    put("neoforge_version_range", neoforgeLibs.versions.neoforge.range)
+    put("minecraft_version_range", neoforgeLibs.versions.minecraft.range)
+}
 
 neoForge {
-    version = libs.versions.neoforge.exact.get()
+    version = neoforgeLibs.versions.neoforge.asProvider().get()
 
     parchment {
         minecraftVersion = libs.versions.parchment.minecraft
@@ -70,7 +68,7 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.kotlinforforge)
-
     implementation(projects.common)
+
+    implementation(neoforgeLibs.kotlinforforge)
 }
