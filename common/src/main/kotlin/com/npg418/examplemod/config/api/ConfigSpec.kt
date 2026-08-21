@@ -1,5 +1,8 @@
+@file:Suppress("SameParameterValue", "Unused")
+
 package com.npg418.examplemod.config.api
 
+import com.npg418.examplemod.ExampleMod
 import kotlin.reflect.KProperty
 
 enum class ConfigType {
@@ -15,6 +18,16 @@ sealed class ConfigNode {
 }
 
 open class ConfigEntry<T : Any> internal constructor(val name: String, val default: T) : ConfigNode() {
+    open var validator: ((Any) -> Boolean) = { true }
+        get() = { value ->
+            field(value).also {
+                if (!it) ExampleMod.LOGGER.warn(
+                    "Config value {} failed validation. Falling back to previous value.",
+                    name
+                )
+            }
+        }
+
     @Volatile
     private var source = { default }
 
@@ -22,21 +35,52 @@ open class ConfigEntry<T : Any> internal constructor(val name: String, val defau
     operator fun getValue(thisRef: Any?, property: KProperty<*>) = get()
 
     fun set(newSource: () -> T) {
-        source = newSource
+        val fallback = source
+        source = {
+            val value = newSource()
+            if (validator(value)) {
+                value
+            } else {
+                fallback()
+            }
+        }
+    }
+
+    fun set(newValue: T) {
+        if (validator(newValue)) {
+            source = { newValue }
+        }
     }
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, newSource: () -> T) = set(newSource)
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, newValue: T) = set(newValue)
 }
 
 class RangedConfigEntry<T : Comparable<T>> internal constructor(
     name: String,
     default: T,
     val range: ClosedRange<T>
-) : ConfigEntry<T>(name, default)
+) : ConfigEntry<T>(name, default) {
+    override var validator: ((Any) -> Boolean) = {
+        val type = default.javaClass
+        type.isInstance(it) && type.cast(it) in range
+    }
+}
 
-class EnumConfigEntry<T : Enum<T>> internal constructor(name: String, default: T) : ConfigEntry<T>(name, default)
+class EnumConfigEntry<T : Enum<T>> internal constructor(name: String, default: T) : ConfigEntry<T>(name, default) {
+    override var validator: ((Any) -> Boolean) = { default.declaringJavaClass.isInstance(it) }
+}
 
-@Suppress("SameParameterValue")
+class ListConfigEntry<T : Any>(
+    name: String,
+    default: List<T>,
+    val newElement: () -> T,
+    override var validator: ((Any) -> Boolean)
+) :
+    ConfigEntry<List<T>>(name, default) {
+    var allowEmpty = default.isEmpty()
+}
+
 abstract class ConfigSection : ConfigNode() {
     val children = linkedMapOf<String, ConfigNode>()
 
@@ -52,6 +96,14 @@ abstract class ConfigSection : ConfigNode() {
 
     protected fun <T : Enum<T>> defineEnum(name: String, default: T, block: (EnumConfigEntry<T>.() -> Unit)? = null) =
         EnumConfigEntry(name, default).apply { block?.invoke(this) }.also { children[name] = it }
+
+    protected fun <T : Any> defineList(
+        name: String,
+        default: List<T>,
+        newElement: () -> T,
+        validator: (Any) -> Boolean,
+        block: (ListConfigEntry<T>.() -> Unit)? = null
+    ) = ListConfigEntry(name, default, newElement, validator).apply { block?.invoke(this) }.also { children[name] = it }
 
     protected fun <T : ConfigSection> section(name: String, factory: () -> T, block: (T.() -> Unit)? = null) =
         factory().apply { block?.invoke(this) }.also { children[name] = it }
