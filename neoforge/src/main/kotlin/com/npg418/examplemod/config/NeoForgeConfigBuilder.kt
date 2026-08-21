@@ -20,11 +20,29 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
         container.registerConfig(spec.type.toModConfigType(), builder.build(), "${spec.baseFileName}.toml")
     }
 
+    private fun bindSection(section: ConfigSection) {
+        for ((name, node) in section.children) {
+            node.comment?.let(builder::comment)
+            node.translation?.let(builder::translation)
+            when (node) {
+                is RangedConfigEntry<*> -> bindRangedEntry(name, node)
+                is EnumConfigEntry<*> -> bindEnumEntry(name, node)
+                is ListConfigEntry<*> -> bindListEntry(name, node)
+                is ConfigEntry<*> -> bindEntry(name, node)
+                is ConfigSection -> {
+                    builder.push(name)
+                    bindSection(node)
+                    builder.pop()
+                }
+            }
+        }
+    }
+
     private fun <T : Any> bindEntry(name: String, entry: ConfigEntry<T>) {
         entry.set(builder.define(name, entry.default)::get)
     }
 
-    private fun  bindRangedEntry(name: String, entry: RangedConfigEntry<*>) {
+    private fun bindRangedEntry(name: String, entry: RangedConfigEntry<*>) {
         entry.set(
             builder.defineInRange(
                 name,
@@ -40,21 +58,11 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
         entry.set(builder.defineEnum(name, entry.default)::get)
     }
 
-
-    private fun bindSection(section: ConfigSection) {
-        for ((name, node) in section.children) {
-            node.comment?.let(builder::comment)
-            node.translation?.let(builder::translation)
-            when (node) {
-                is RangedConfigEntry<*> -> bindRangedEntry(name, node)
-                is EnumConfigEntry<*> -> bindEnumEntry(name, node)
-                is ConfigEntry<*> -> bindEntry(name, node)
-                is ConfigSection -> {
-                    builder.push(name)
-                    bindSection(node)
-                    builder.pop()
-                }
-            }
-        }
+    private fun <T : Any> bindListEntry(name: String, entry: ListConfigEntry<T>) {
+        if (entry.allowEmpty) {
+            builder.defineListAllowEmpty(name, entry.default, entry.newElement, entry.validator)
+        } else {
+            builder.defineList(name, entry.default, entry.newElement, entry.validator)
+        }.let { entry.set(it::get) }
     }
 }

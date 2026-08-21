@@ -22,63 +22,84 @@ class FabricConfigBuilder(private val spec: ConfigSpec) {
         for ((name, node) in section.children) {
             val existing = children[name]
             children[name] = when (node) {
-                is RangedConfigEntry<*> -> bindRangedEntry(existing, node)
-                is ConfigEntry<*> -> bindEntry(existing, node)
+                is RangedConfigEntry<*> -> bindRangedEntry(node, existing as? JsonPrimitive ?: JsonNull)
+                is ListConfigEntry<*> -> bindListEntry(node, existing as? JsonArray)
+                is ConfigEntry<*> -> bindEntry(node, existing as? JsonPrimitive ?: JsonNull)
                 is ConfigSection -> bindSection(node, existing as? JsonObject ?: JsonObject(emptyMap()))
             }
         }
         return JsonObject(children)
     }
 
-    private fun <T : Comparable<T>> bindRangedEntry(existing: JsonElement?, entry: RangedConfigEntry<T>): JsonElement {
-        val parsed = fromJsonElement(entry.default, existing)
+    private fun <T : Any> bindEntry(
+        entry: ConfigEntry<T>,
+        existing: JsonPrimitive,
+    ): JsonElement {
+        val value = fromJsonPrimitive(entry.default, existing)
+        entry.set(value)
+        return toJsonElement(entry)
+    }
+
+    private fun <T : Comparable<T>> bindRangedEntry(entry: RangedConfigEntry<T>, existing: JsonPrimitive): JsonElement {
+        val parsed = fromJsonPrimitive(entry.default, existing)
         val value = parsed.coerceIn(entry.range)
         if (value != parsed) {
-            ExampleMod.LOGGER.warn("Config value {} is out of range. (Range: {}) Value clamped to {}.", entry.name, entry.range, value)
+            ExampleMod.LOGGER.warn(
+                "Config value {} is out of range. (Value: {}, Range: {}) Value clamped to {}.",
+                entry.name,
+                parsed,
+                entry.range,
+                value
+            )
         }
-        entry.set { value }
+        entry.set(value)
         return toJsonElement(entry)
     }
 
-    private fun <T : Any> bindEntry(
-        existing: JsonElement?,
-        entry: ConfigEntry<T>
-    ): JsonElement {
-        val value = fromJsonElement(entry.default, existing)
-        entry.set { value }
+    private fun <T : Any> bindListEntry(entry: ListConfigEntry<T>, existing: JsonArray?): JsonElement {
+        if (existing != null) {
+            val sample = entry.newElement()
+            val parsed = existing.filterIsInstance<JsonPrimitive>().map { fromJsonPrimitive(sample, it) }
+            if (parsed.isNotEmpty() || entry.allowEmpty) entry.set(parsed)
+        }
         return toJsonElement(entry)
     }
 
-    private fun <T : Any> fromJsonElement(default: T, element: JsonElement?): T {
-        if (element == null || element !is JsonPrimitive || element is JsonNull) return default
+    private fun <T : Any> fromJsonPrimitive(default: T, primitive: JsonPrimitive): T {
+        if (primitive is JsonNull) return default
 
         @Suppress("UNCHECKED_CAST")
         return when (default) {
-            is Boolean -> element.boolean
-            is Int -> element.int
-            is Long -> element.long
-            is Double -> element.double
-            is Float -> element.float
-            is String -> element.content
-            is Enum<*> -> default.javaClass.enumConstants.firstOrNull { it.name.equals(element.content, ignoreCase = true) } ?: default
+            is Boolean -> primitive.boolean
+            is Int -> primitive.int
+            is Long -> primitive.long
+            is Double -> primitive.double
+            is Float -> primitive.float
+            is String -> primitive.content
+            is Enum<*> -> default.declaringJavaClass.enumConstants.firstOrNull {
+                it.name.equals(
+                    primitive.content,
+                    ignoreCase = true
+                )
+            } ?: default
+
             else -> throw IllegalArgumentException("Unsupported config value type: ${default::class.simpleName}")
         } as T
     }
 
     private fun toJsonElement(node: ConfigNode): JsonElement = when (node) {
-        is ConfigEntry<*> -> node.get().let {
-            when (it) {
-                is Number -> JsonPrimitive(it)
-                is Boolean -> JsonPrimitive(it)
-                is String -> JsonPrimitive(it)
-                is Enum<*> -> JsonPrimitive(it.name)
-                else -> throw IllegalArgumentException("Unsupported config value type: ${this::class.simpleName}")
-            }
-        }
-
+        is ListConfigEntry<*> -> JsonArray(node.get().map(::toJsonPrimitive))
+        is ConfigEntry<*> -> node.get().let(::toJsonPrimitive)
         is ConfigSection -> JsonObject(node.children.mapValues { (_, childNode) -> toJsonElement(childNode) })
     }
 
+    private fun toJsonPrimitive(value: Any): JsonPrimitive = when (value) {
+        is Number -> JsonPrimitive(value)
+        is Boolean -> JsonPrimitive(value)
+        is String -> JsonPrimitive(value)
+        is Enum<*> -> JsonPrimitive(value.name)
+        else -> throw IllegalArgumentException("Unsupported config value type: ${this::class.simpleName}")
+    }
 
     private fun readJson(): JsonObject = runCatching {
         json.parseToJsonElement(Files.readString(path)).jsonObject
