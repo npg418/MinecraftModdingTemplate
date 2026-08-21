@@ -65,10 +65,14 @@ repositories {
     maven("https://thedarkcolour.github.io/KotlinForForge") {
         name = "Kotlin for Forge"
     }
+    maven("https://cursemaven.com") {
+        name = "CurseMaven"
+    }
 }
 
 dependencies {
     implementation(projects.common)
 
     implementation(neoforgeLibs.kotlinforforge)
+    runtimeOnly(neoforgeLibs.configured)
 }

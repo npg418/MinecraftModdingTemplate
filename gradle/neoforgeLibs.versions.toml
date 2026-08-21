@@ -9,5 +9,10 @@ neoforge-range = "[21,21.1]"
 kotlinforforge = "5.10.0"
 kotlinforforge-range = "[5.10,6)"
 
+# https://www.curseforge.com/minecraft/mc-mods/configured/files/all?gameVersionTypeId=6
+configured = "7276577" # v2.6.3
+
 [libraries]
 kotlinforforge = { group = "thedarkcolour", name = "kotlinforforge-neoforge", version.ref = "kotlinforforge" }
+
+configured = { group = "curse.maven", name = "configured-457570", version.ref = "configured" }
