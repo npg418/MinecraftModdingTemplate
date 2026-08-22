@@ -9,6 +9,7 @@ object StartupConfig : ConfigSpec(ExampleMod.MODID, ConfigType.STARTUP) {
     class ItemSection : ConfigSection() {
         val exampleItemDurability by defineInRange("exampleItemDurability", 64, 1..Int.MAX_VALUE) {
             comment = "Durability of Example Item"
+            gameRestart = true
         }
     }
 

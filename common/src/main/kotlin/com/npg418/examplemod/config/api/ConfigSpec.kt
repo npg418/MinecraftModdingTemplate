@@ -13,8 +13,8 @@ enum class ConfigType {
 }
 
 sealed class ConfigNode {
-    var comment: String? = null
-    var translation: String? = null
+    open var comment: String? = null
+    open var translation: String? = null
 }
 
 open class ConfigEntry<T : Any> internal constructor(val name: String, val default: T) : ConfigNode() {
@@ -27,8 +27,9 @@ open class ConfigEntry<T : Any> internal constructor(val name: String, val defau
                 )
             }
         }
-
     open var allowedValues: Collection<T>? = null
+    open var worldRestart = false
+    open var gameRestart = false
 
     @Volatile
     private var source = { default }
