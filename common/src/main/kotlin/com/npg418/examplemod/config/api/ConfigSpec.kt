@@ -79,8 +79,7 @@ class ListConfigEntry<T : Any>(
     default: List<T>,
     val newElement: () -> T,
     override var validator: ((Any) -> Boolean)
-) :
-    ConfigEntry<List<T>>(name, default) {
+) : ConfigEntry<List<T>>(name, default) {
     var allowEmpty = default.isEmpty()
 }
 
