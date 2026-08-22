@@ -39,23 +39,26 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
     }
 
     private fun <T : Any> bindEntry(name: String, entry: ConfigEntry<T>) {
-        entry.set(builder.define(name, entry.default)::get)
+        val allowed = entry.allowedValues
+        if (allowed != null) {
+            builder.defineInList(name, entry.default, allowed)
+        } else {
+            builder.define(name, entry.default)
+        }.let { entry.set(it::get) }
     }
 
-    private fun bindRangedEntry(name: String, entry: RangedConfigEntry<*>) {
-        entry.set(
-            builder.defineInRange(
-                name,
-                entry.default,
-                entry.range.start,
-                entry.range.endInclusive,
-                entry.default.javaClass
-            )::get
-        )
+    private fun <T : Comparable<T>> bindRangedEntry(name: String, entry: RangedConfigEntry<T>) {
+        builder.defineInRange(
+            name,
+            entry.default,
+            entry.range.start,
+            entry.range.endInclusive,
+            entry.default.javaClass
+        ).let { entry.set(it::get) }
     }
 
-    private fun bindEnumEntry(name: String, entry: EnumConfigEntry<*>) {
-        entry.set(builder.defineEnum(name, entry.default)::get)
+    private fun <T : Enum<T>> bindEnumEntry(name: String, entry: EnumConfigEntry<T>) {
+        builder.defineEnum(name, entry.default).let { entry.set(it::get) }
     }
 
     private fun <T : Any> bindListEntry(name: String, entry: ListConfigEntry<T>) {

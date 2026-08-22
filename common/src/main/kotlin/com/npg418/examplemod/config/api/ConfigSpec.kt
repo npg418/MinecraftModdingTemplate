@@ -18,7 +18,7 @@ sealed class ConfigNode {
 }
 
 open class ConfigEntry<T : Any> internal constructor(val name: String, val default: T) : ConfigNode() {
-    open var validator: ((Any) -> Boolean) = { true }
+    open var validator: ((Any) -> Boolean) = { allowedValues?.contains(it) ?: true }
         get() = { value ->
             field(value).also {
                 if (!it) ExampleMod.LOGGER.warn(
@@ -27,6 +27,8 @@ open class ConfigEntry<T : Any> internal constructor(val name: String, val defau
                 )
             }
         }
+
+    open var allowedValues: Collection<T>? = null
 
     @Volatile
     private var source = { default }
