@@ -5,25 +5,24 @@ import net.neoforged.fml.ModContainer
 import net.neoforged.fml.config.ModConfig
 import net.neoforged.neoforge.common.ModConfigSpec
 
-fun ConfigType.toModConfigType(): ModConfig.Type = when (this) {
-    ConfigType.COMMON -> ModConfig.Type.COMMON
-    ConfigType.CLIENT -> ModConfig.Type.CLIENT
-    ConfigType.SERVER -> ModConfig.Type.SERVER
-    ConfigType.STARTUP -> ModConfig.Type.STARTUP
-}
-
 class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
     private val builder = ModConfigSpec.Builder()
 
     fun register(container: ModContainer) {
         bindSection(spec)
-        container.registerConfig(spec.type.toModConfigType(), builder.build(), "${spec.baseFileName}.toml")
+        container.registerConfig(ModConfig.Type.valueOf(spec.type.name), builder.build(), "${spec.baseFileName}.toml")
     }
 
     private fun bindSection(section: ConfigSection) {
         for ((name, node) in section.children) {
             node.comment?.let(builder::comment)
             node.translation?.let(builder::translation)
+
+            if (node is ConfigEntry<*>) {
+                if (node.worldRestart) builder.worldRestart()
+                if (node.gameRestart) builder.gameRestart()
+            }
+
             when (node) {
                 is RangedConfigEntry<*> -> bindRangedEntry(name, node)
                 is EnumConfigEntry<*> -> bindEnumEntry(name, node)
@@ -31,8 +30,11 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) {
                 is ConfigEntry<*> -> bindEntry(name, node)
                 is ConfigSection -> {
                     builder.push(name)
-                    bindSection(node)
-                    builder.pop()
+                    try {
+                        bindSection(node)
+                    } finally {
+                        builder.pop()
+                    }
                 }
             }
         }
