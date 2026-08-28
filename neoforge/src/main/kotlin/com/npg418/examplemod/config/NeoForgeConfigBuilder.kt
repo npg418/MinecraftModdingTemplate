@@ -97,11 +97,17 @@ class NeoForgeConfigBuilder(val configSpec: ConfigSpec) {
     }
 
     private fun <T : Any> bind(name: String, d: NormalConfigProperty<T>) {
-        builder.define(name, d.default).bind(d)
+        val configValue = d.validator?.let {
+            builder.define(name, d.default, it)
+        } ?: builder.define(name, d.default)
+        configValue.bind(d)
     }
 
     private fun <T : Enum<T>> bind(name: String, d: EnumConfigProperty<T>) {
-        builder.defineEnum(name, d.default).bind(d)
+        val configValue = d.validator?.let {
+            builder.defineEnum(name, d.default, it)
+        } ?: builder.defineEnum(name, d.default)
+        configValue.bind(d)
     }
 
     private fun <E : Any> bind(name: String, d: ListConfigProperty<E>) {

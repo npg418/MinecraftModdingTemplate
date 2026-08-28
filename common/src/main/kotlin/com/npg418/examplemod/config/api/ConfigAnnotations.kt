@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.npg418.examplemod.config.api
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY)
