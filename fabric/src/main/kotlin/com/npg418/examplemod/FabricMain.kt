@@ -12,9 +12,7 @@ class FabricMain : ModInitializer {
     override fun onInitialize() {
         ExampleMod.LOGGER.debug("Hello from Fabric Mod!")
 
-        CONFIGS.forEach {
-            FabricConfigBuilder(it).register()
-        }
+        CONFIGS.forEach { FabricConfigBuilder(it).register(ExampleMod.MODID) }
 
         ITEM_MAP.forEach { (name, item) ->
             Registry.register(
