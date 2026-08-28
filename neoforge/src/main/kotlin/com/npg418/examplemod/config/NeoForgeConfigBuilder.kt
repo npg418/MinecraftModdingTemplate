@@ -33,6 +33,11 @@ class NeoForgeConfigBuilder(val configSpec: ConfigSpec) {
         container.registerConfig(ModConfig.Type.valueOf(configSpec.configType.name), builder.build())
     }
 
+    private fun applyCommentAndTranslation(annotated: KAnnotatedElement) {
+        annotated.findAnnotation<Comment>()?.let { builder.comment(it.value) }
+        annotated.findAnnotation<Translation>()?.let { builder.translation(it.value) }
+    }
+
     private fun registerObject(kClass: KClass<*>, instance: Any) {
         kClass.declaredMemberProperties.forEach { registerProperty(it, instance) }
 
@@ -80,43 +85,40 @@ class NeoForgeConfigBuilder(val configSpec: ConfigSpec) {
         when (delegate) {
             is NormalConfigProperty<*> -> bind(name, delegate)
             is EnumConfigProperty<*> -> bind(name, delegate)
+            is ListConfigProperty<*> -> bind(name, delegate)
             is RangedConfigProperty<*> -> bind(name, delegate)
-            is ListedConfigProperty<*> -> bind(name, delegate)
+            is OneOfConfigProperty<*> -> bind(name, delegate)
         }
+    }
+
+    private fun <T : Any> ModConfigSpec.ConfigValue<T>.bind(d: ConfigProperty<T>) {
+        d.getter = this::get
+        d.setter = this::set
     }
 
     private fun <T : Any> bind(name: String, d: NormalConfigProperty<T>) {
-        builder.define(name, d.default).let {
-            d.getter = it::get
-            d.setter = it::set
-        }
+        builder.define(name, d.default).bind(d)
     }
 
     private fun <T : Enum<T>> bind(name: String, d: EnumConfigProperty<T>) {
-        builder.defineEnum(name, d.default).let {
-            d.getter = it::get
-            d.setter = it::set
-        }
+        builder.defineEnum(name, d.default).bind(d)
+    }
+
+    private fun <E : Any> bind(name: String, d: ListConfigProperty<E>) {
+        if (d.allowEmpty) {
+            builder.defineListAllowEmpty(name, d.default, d.newElement, d.elementValidator)
+        } else {
+            builder.defineList(name, d.default, d.newElement, d.elementValidator)
+        }.bind(d)
     }
 
     private fun <T : Comparable<T>> bind(name: String, d: RangedConfigProperty<T>) {
         @Suppress("UNCHECKED_CAST")
         builder.defineInRange(name, d.default, d.range.start, d.range.endInclusive, d.default::class.java as Class<T>)
-            .let {
-                d.getter = it::get
-                d.setter = it::set
-            }
+            .bind(d)
     }
 
-    private fun <T : Any> bind(name: String, d: ListedConfigProperty<T>) {
-        builder.defineInList(name, d.default, d.allowedValues).let {
-            d.getter = it::get
-            d.setter = it::set
-        }
-    }
-
-    private fun applyCommentAndTranslation(annotated: KAnnotatedElement) {
-        annotated.findAnnotation<Comment>()?.let { builder.comment(it.value) }
-        annotated.findAnnotation<Translation>()?.let { builder.translation(it.value) }
+    private fun <T : Any> bind(name: String, d: OneOfConfigProperty<T>) {
+        builder.defineInList(name, d.default, d.allowedValues).bind(d)
     }
 }
