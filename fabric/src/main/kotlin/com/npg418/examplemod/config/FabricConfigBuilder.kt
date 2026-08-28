@@ -7,7 +7,7 @@ import net.fabricmc.loader.api.FabricLoader
 import java.nio.file.Files
 
 
-class FabricConfigBuilder(private val spec: ConfigSpec) {
+class FabricConfigBuilder(private val spec: Config) {
     private val path = FabricLoader.getInstance().configDir.resolve("${spec.baseFileName}.json")
     private val json = Json { prettyPrint = true }
 
@@ -24,7 +24,7 @@ class FabricConfigBuilder(private val spec: ConfigSpec) {
             children[name] = when (node) {
                 is RangedConfigEntry<*> -> bindRangedEntry(node, existing as? JsonPrimitive ?: JsonNull)
                 is ListConfigEntry<*> -> bindListEntry(node, existing as? JsonArray)
-                is ConfigEntry<*> -> bindEntry(node, existing as? JsonPrimitive ?: JsonNull)
+                is ConfigProperty<*> -> bindEntry(node, existing as? JsonPrimitive ?: JsonNull)
                 is ConfigSection -> bindSection(node, existing as? JsonObject ?: JsonObject(emptyMap()))
             }
         }
@@ -32,7 +32,7 @@ class FabricConfigBuilder(private val spec: ConfigSpec) {
     }
 
     private fun <T : Any> bindEntry(
-        entry: ConfigEntry<T>,
+        entry: ConfigProperty<T>,
         existing: JsonPrimitive,
     ): JsonElement {
         val value = fromJsonPrimitive(entry.default, existing)
@@ -89,7 +89,7 @@ class FabricConfigBuilder(private val spec: ConfigSpec) {
 
     private fun toJsonElement(node: ConfigNode): JsonElement = when (node) {
         is ListConfigEntry<*> -> JsonArray(node.get().map(::toJsonPrimitive))
-        is ConfigEntry<*> -> node.get().let(::toJsonPrimitive)
+        is ConfigProperty<*> -> node.get().let(::toJsonPrimitive)
         is ConfigSection -> JsonObject(node.children.mapValues { (_, childNode) -> toJsonElement(childNode) })
     }
 

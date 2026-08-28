@@ -19,13 +19,12 @@ enum class GreetingLang(val greet: String) {
     KR("안녕하세요, ")
 }
 
-class ExampleItem :
-    Item(Properties().stacksTo(1).durability(StartupConfig.item.exampleItemDurability)) {
+class ExampleItem : Item(Properties().stacksTo(1).durability(StartupConfig.Item.exampleItemDurability)) {
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack?> {
         val stack = player.getItemInHand(usedHand)
         if (level.isClientSide) {
             player.displayClientMessage(
-                Component.literal(CommonConfig.item.exampleItemGreetingLang.greet)
+                Component.literal(CommonConfig.Item.greetingLang.greet)
                     .append(player.name)
                     .append(Component.literal("!")),
                 false

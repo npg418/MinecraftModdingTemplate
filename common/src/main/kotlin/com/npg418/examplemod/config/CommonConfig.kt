@@ -1,27 +1,23 @@
 package com.npg418.examplemod.config
 
-import com.npg418.examplemod.ExampleMod
-import com.npg418.examplemod.config.api.ConfigSection
+import com.npg418.examplemod.config.api.Comment
 import com.npg418.examplemod.config.api.ConfigSpec
 import com.npg418.examplemod.config.api.ConfigType
+import com.npg418.examplemod.config.api.Name
 import com.npg418.examplemod.items.GreetingLang
 
-object CommonConfig : ConfigSpec(ExampleMod.MODID, ConfigType.COMMON) {
-    class GreetingSection : ConfigSection() {
-        val greetOnTitleScreen by define("greetOnTitleScreen", true) {
-            comment = "Whether log when title screen"
-        }
+object CommonConfig : ConfigSpec(ConfigType.COMMON) {
+    @Comment("Greeting log settings")
+    @Name("greeting")
+    object Greeting {
+        @Comment("Whether log when title screen")
+        var greetOnTitleScreen by defining(true)
     }
 
-    val greeting = section("greeting", ::GreetingSection) {
-        comment = "Greeting log settings"
+    @Name("item")
+    object Item {
+        @Comment("Greeting language when right-clicking Example Item")
+        @Name("exampleItemGreetingLang")
+        var greetingLang by definingEnum(GreetingLang.EN)
     }
-
-    class ItemSection : ConfigSection() {
-        val exampleItemGreetingLang by defineEnum("exampleItemGreetingLang", GreetingLang.EN) {
-            comment = "Greeting language when right-clicking Example Item"
-        }
-    }
-
-    val item = section("item", ::ItemSection)
 }
