@@ -15,4 +15,5 @@ neoForge {
 
 dependencies {
     compileOnly(libs.sponge.mixin)
+    compileOnly(kotlin("reflect"))
 }
