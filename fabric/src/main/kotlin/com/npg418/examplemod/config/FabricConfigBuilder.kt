@@ -9,77 +9,34 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.safeCast
 
 
-class FabricConfigBuilder(private val configSpec: ConfigSpec) {
+class FabricConfigBuilder(private val spec: ConfigSpec) : ConfigTreeWalker(LOGGER) {
     companion object {
         val LOGGER: Logger = LogUtils.getLogger()
     }
 
     private val json = Json { prettyPrint = true }
 
+    private var existing = JsonObject(emptyMap())
+    private var children = mutableMapOf<String, JsonElement>()
+
     fun register(modId: String) {
-        val configClass = configSpec::class
-        val instance = configClass.objectInstance
-        if (instance == null) {
-            LOGGER.error(
-                "Could not register config class {} because it is not object class.",
-                configClass.qualifiedName
-            )
-            return
-        }
-
-        val path = FabricLoader.getInstance().configDir.resolve("$modId-${configSpec.configType.name.lowercase()}.json")
-        val existing = readJson(path)
-        val merged = registerObject(configClass, instance, existing)
-        writeJson(path, merged)
-    }
-
-    private fun registerObject(kClass: KClass<*>, instance: Any, existing: JsonObject): JsonObject {
-        val children = mutableMapOf<String, JsonElement>()
-        kClass.declaredMemberProperties.mapNotNull { registerProperty(it, instance, existing) }.forEach(children::plusAssign)
-
-        kClass.nestedClasses.mapNotNull { nestedClass ->
-            val nestedInstance = nestedClass.objectInstance
-            if (nestedInstance == null) {
-                LOGGER.warn(
-                    "Nested class {} inside config class {} is not an object. Skipping.",
-                    nestedClass.qualifiedName,
-                    kClass.qualifiedName
-                )
-                return@mapNotNull null
+        val path = FabricLoader.getInstance().configDir.resolve("$modId-${spec.configType.name.lowercase()}.json")
+        existing = readJson(path)
+        children = mutableMapOf()
+        walkRoot(spec::class).fold(
+            onSuccess = {
+                writeJson(path, JsonObject(children))
+            },
+            onFailure = {
+                LOGGER.error("An error occurred while registering {}.", spec::class.simpleName, it)
             }
-
-            val sectionName = nestedClass.findAnnotation<Name>()?.value ?: nestedClass.simpleName!!
-            val nestedExisting = existing[sectionName] as? JsonObject ?: JsonObject(emptyMap())
-            children[sectionName] = registerObject(nestedClass, nestedInstance, nestedExisting)
-        }
-        return JsonObject(children)
+        )
     }
 
-    private fun registerProperty(
-        property: KProperty1<out Any, *>,
-        receiver: Any,
-        existing: JsonObject
-    ): Pair<String, JsonElement>? {
-        val name = property.findAnnotation<Name>()?.value ?: property.name
-        property.isAccessible = true
-        @Suppress("UNCHECKED_CAST")
-        val delegate = (property as KProperty1<Any, *>).getDelegate(receiver)
-        if (delegate !is ConfigProperty<*>) {
-            LOGGER.warn(
-                "Property {} in class {} is not a {}. Skipping.",
-                name,
-                receiver::class.qualifiedName,
-                ConfigProperty::class.simpleName
-            )
-            return null
-        }
-
+    override fun onProperty(name: String, property: KProperty1<out Any, *>, delegate: ConfigProperty<*>) {
         val element = existing[name]
         when (delegate) {
             is ListConfigProperty<*> -> if (element is JsonArray) bind(name, delegate, element)
@@ -92,8 +49,20 @@ class FabricConfigBuilder(private val configSpec: ConfigSpec) {
                 }
             }
         }
+        children[name] = toJsonElement(delegate)
+    }
 
-        return name to toJsonElement(delegate)
+    override fun onSection(name: String, sectionClass: KClass<*>, visitChildren: () -> Unit) {
+        val parentExisting = existing
+        val parentChildren = children
+        existing = existing[name] as? JsonObject ?: JsonObject(emptyMap())
+        children = mutableMapOf()
+
+        visitChildren()
+
+        parentChildren[name] = JsonObject(children)
+        existing = parentExisting
+        children = parentChildren
     }
 
     private fun <T : Any> bind(name: String, d: NormalConfigProperty<T>, existing: JsonPrimitive) {
@@ -199,7 +168,7 @@ class FabricConfigBuilder(private val configSpec: ConfigSpec) {
     }
 
     private fun <T : Any> toJsonElement(property: ConfigProperty<T>): JsonElement {
-        return when(property) {
+        return when (property) {
             is ListConfigProperty<*> -> JsonArray(property.getter().map(::toJsonPrimitive))
             else -> toJsonPrimitive(property.getter())
         }
