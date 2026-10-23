@@ -1,9 +1,6 @@
 package com.npg418.gradle.modding
 
 import libs
-import org.gradle.plugins.ide.idea.model.IdeaModel
-import org.jetbrains.gradle.ext.settings
-import org.jetbrains.gradle.ext.taskTriggers
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -15,10 +12,19 @@ version = providers.gradleProperty("mod_version").get()
 
 base.archivesName = providers.gradleProperty("mod_id")
 
-java.toolchain {
-    languageVersion = providers.gradleProperty("java_version").map { JavaLanguageVersion.of(it) }
-    @Suppress("UnstableApiUsage")
-    vendor = JvmVendorSpec.JETBRAINS
+java {
+    toolchain {
+        languageVersion = providers.gradleProperty("java_version").map { JavaLanguageVersion.of(it) }
+        @Suppress("UnstableApiUsage")
+        vendor = JvmVendorSpec.JETBRAINS
+    }
+    withSourcesJar()
+}
+
+repositories {
+    maven("https://maven.teamresourceful.com/repository/maven-public/") {
+        name = "Team Resourceful Maven"
+    }
 }
 
 val hotswapJvmArgs = provider {
@@ -82,13 +88,13 @@ idea {
     }
 }
 
-rootProject.pluginManager.apply(libs.plugins.idea.ext.get().pluginId)
-rootProject.extensions.configure<IdeaModel> {
-    project {
-        settings {
-            taskTriggers {
-                beforeSync(generateModMetadata)
-            }
-        }
-    }
-}
+//rootProject.pluginManager.apply(libs.plugins.idea.ext.get().pluginId)
+//rootProject.extensions.configure<IdeaModel> {
+//    project {
+//        settings {
+//            taskTriggers {
+//                beforeSync(generateModMetadata)
+//            }
+//        }
+//    }
+//}

@@ -1,14 +1,10 @@
+import com.npg418.gradle.modding.prop
+import com.npg418.gradle.modding.versionRange
+import net.fabricmc.loom.task.FabricModJsonV1Task
+
 plugins {
     alias(conventions.plugins.common.convention)
     alias(libs.plugins.fabric.loom)
-}
-
-expandProperties {
-    put("fabric_loader_version_range", fabricLibs.versions.fabric.loader.range)
-    put("minecraft_version_range", fabricLibs.versions.minecraft.range)
-    put("java_version_range", java.toolchain.languageVersion.map { ">=$it" })
-    put("fabric_api_version_range", fabricLibs.versions.fabric.api.range)
-    put("fabric_kotlin_version_range", fabricLibs.versions.fabric.kotlin.range)
 }
 
 fabricApi {
@@ -32,10 +28,61 @@ loom {
     }
 
     mods {
-        register(providers.gradleProperty("mod_id").get()) {
+        register(prop("mod_id").get()) {
             sourceSet(sourceSets.main.get())
             sourceSet(project(":common").sourceSets.main.get())
         }
+    }
+}
+
+fun mavenToFabric(range: String): List<String> {
+    if (range.replace(" ", "") in setOf("[0,)", "(,)", "*")) return listOf("*")
+    val parts = Regex("""[\[(][^\[\]()]*[])]""").findAll(range).map { it.value }.toList()
+    if (parts.isEmpty()) return listOf(">=$range")
+
+    return parts.map { s ->
+        val body = s.substring(1, s.length - 1)
+        if (',' !in body) return@map "=${body.trim()}"
+        val (min, max) = body.split(',', limit = 2).map { it.trim() }
+        listOfNotNull(
+            min.takeIf { it.isNotEmpty() }?.let { (if (s.first() == '[') ">=" else ">") + it },
+            max.takeIf { it.isNotEmpty() }?.let { (if (s.last() == ']') "<=" else "<") + it },
+        ).joinToString(" ")
+    }
+}
+
+val generateModJson = tasks.register<FabricModJsonV1Task>("generateModJson") {
+    description = "Generates fabric mod metadata"
+    outputFile = layout.buildDirectory.file("generated/fabric.mod.json")
+
+    json {
+        modId = prop("mod_id")
+        version = prop("mod_version")
+        name = prop("mod_name")
+        description = prop("mod_description")
+        prop("mod_authors").map {
+            it.split(",").forEach { name ->
+                author(name)
+            }
+        }
+        licenses.add(prop("mod_license"))
+        entrypoint("main") {
+            adapter = "kotlin"
+            value = "com.npg418.examplemod.FabricMain"
+        }
+        entrypoint("fabric-datagen") {
+            adapter = "kotlin"
+            value = "com.npg418.examplemod.datagen.ExampleModDataGenerator"
+        }
+        prop("mod_id").map {
+            mixin("$it.mixins.json")
+            mixin("$it.fabric.mixins.json")
+        }
+        depends("fabricloader", fabricLibs.fabric.loader.versionRange.map(::mavenToFabric).get())
+        depends("minecraft", libs.minecraft.versionRange.map(::mavenToFabric).get())
+        depends("java", java.toolchain.languageVersion.map { ">=$it" }.get())
+        depends("fabric-api", fabricLibs.fabric.api.versionRange.map(::mavenToFabric).get())
+        depends("fabric-language-kotlin", fabricLibs.fabric.kotlin.versionRange.map(::mavenToFabric).get())
     }
 }
 
@@ -51,7 +98,9 @@ repositories {
 dependencies {
     implementation(projects.common)
 
-    minecraft(libs.minecraft)
+    minecraft(libs.minecraft) {
+        version { require(preferredVersion) }
+    }
     @Suppress("UnstableApiUsage")
     mappings(loom.layered {
         officialMojangMappings()
@@ -61,5 +110,5 @@ dependencies {
     modImplementation(fabricLibs.fabric.api)
     modImplementation(fabricLibs.fabric.kotlin)
 
-    modImplementation(fabricLibs.modmenu)
+    modRuntimeOnly(fabricLibs.modmenu)
 }
