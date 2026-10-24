@@ -1,6 +1,9 @@
 import com.npg418.gradle.modding.prop
 import com.npg418.gradle.modding.versionRange
 import net.fabricmc.loom.task.FabricModJsonV1Task
+import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.jetbrains.gradle.ext.settings
+import org.jetbrains.gradle.ext.taskTriggers
 
 plugins {
     alias(conventions.plugins.common.convention)
@@ -53,17 +56,15 @@ fun mavenToFabric(range: String): List<String> {
 
 val generateModJson = tasks.register<FabricModJsonV1Task>("generateModJson") {
     description = "Generates fabric mod metadata"
-    outputFile = layout.buildDirectory.file("generated/fabric.mod.json")
+    outputFile = layout.buildDirectory.file("generated/resources/fabric.mod.json")
 
     json {
         modId = prop("mod_id")
         version = prop("mod_version")
         name = prop("mod_name")
         description = prop("mod_description")
-        prop("mod_authors").map {
-            it.split(",").forEach { name ->
-                author(name)
-            }
+        prop("mod_authors").get().split(",").forEach { name ->
+            author(name)
         }
         licenses.add(prop("mod_license"))
         entrypoint("main") {
@@ -74,7 +75,7 @@ val generateModJson = tasks.register<FabricModJsonV1Task>("generateModJson") {
             adapter = "kotlin"
             value = "com.npg418.examplemod.datagen.ExampleModDataGenerator"
         }
-        prop("mod_id").map {
+        modId.get().let {
             mixin("$it.mixins.json")
             mixin("$it.fabric.mixins.json")
         }
@@ -83,6 +84,17 @@ val generateModJson = tasks.register<FabricModJsonV1Task>("generateModJson") {
         depends("java", java.toolchain.languageVersion.map { ">=$it" }.get())
         depends("fabric-api", fabricLibs.fabric.api.versionRange.map(::mavenToFabric).get())
         depends("fabric-language-kotlin", fabricLibs.fabric.kotlin.versionRange.map(::mavenToFabric).get())
+    }
+}
+rootProject.plugins.withId(libs.plugins.idea.ext.get().pluginId) {
+    rootProject.extensions.configure<IdeaModel> {
+        project {
+            settings {
+                taskTriggers {
+                    afterSync(generateModJson)
+                }
+            }
+        }
     }
 }
 
