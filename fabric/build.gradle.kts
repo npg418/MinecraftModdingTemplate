@@ -56,7 +56,7 @@ fun mavenToFabric(range: String): List<String> {
 
 val generateModJson = tasks.register<FabricModJsonV1Task>("generateModJson") {
     description = "Generates fabric mod metadata"
-    outputFile = layout.buildDirectory.file("generated/resources/fabric.mod.json")
+    outputFile = generatedResourcesDir.map { it.file("fabric.mod.json") }
 
     json {
         modId = prop("mod_id")

@@ -1,4 +1,7 @@
 import com.npg418.gradle.modding.*
+import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.jetbrains.gradle.ext.settings
+import org.jetbrains.gradle.ext.taskTriggers
 import org.slf4j.event.Level
 
 plugins {
@@ -58,7 +61,7 @@ neoForge {
 
 val generateModsToml = tasks.register<NeoForgeModsTomlTask>("generateModsToml") {
     description = "Generates neoforge mod metadata"
-    outputFile = layout.buildDirectory.file("generated/resources/META-INF/neoforge.mods.toml")
+    outputFile = generatedResourcesDir.map { it.file("META-INF/neoforge.mods.toml") }
 
     toml {
         modLoader = "kotlinforforge"
@@ -89,6 +92,17 @@ val generateModsToml = tasks.register<NeoForgeModsTomlTask>("generateModsToml") 
                 versionRange = libs.minecraft.versionRange
                 ordering = Ordering.NONE
                 side = Side.BOTH
+            }
+        }
+    }
+}
+rootProject.plugins.withId(libs.plugins.idea.ext.get().pluginId) {
+    rootProject.extensions.configure<IdeaModel> {
+        project {
+            settings {
+                taskTriggers {
+                    afterSync(generateModsToml)
+                }
             }
         }
     }
