@@ -22,12 +22,6 @@ java {
     withJavadocJar()
 }
 
-repositories {
-    maven("https://maven.teamresourceful.com/repository/maven-public/") {
-        name = "Team Resourceful Maven"
-    }
-}
-
 val hotswapJvmArgs = provider {
     val mixinJar = configurations.runtimeClasspath.get()
         .copyRecursive()

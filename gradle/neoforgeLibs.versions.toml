@@ -9,6 +9,7 @@ kotlinforforge = { prefer = "5.10.0", strictly = "[5.10,6)" }
 configured = "7276577" # v2.6.3
 
 [libraries]
+#noinspection UnusedVersionCatalogEntry
 neoforge = { group = "net.neoforged", name = "neoforge", version.ref = "neoforge" }
 
 kotlinforforge = { group = "thedarkcolour", name = "kotlinforforge-neoforge", version.ref = "kotlinforforge" }

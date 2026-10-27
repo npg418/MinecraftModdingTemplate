@@ -20,10 +20,8 @@ parchment-mapping = "2024.11.17"
 # https://maven.fabricmc.net/net/fabricmc/sponge-mixin/
 sponge-mixin = "0.15.2+mixin.0.8.7"
 
-# https://beehive.sh/mod/resourcefulconfig/versions
-resourceful-config = { prefer = "3.0.11", strictly = "[3.0,3.1)" }
-
 [plugins]
+#noinspection UnusedVersionCatalogEntry
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 idea-ext = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "idea-ext" }
 
@@ -36,4 +34,3 @@ nightconfig-toml = { group = "com.electronwill.night-config", name = "toml", ver
 
 minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft" }
 sponge-mixin = { group = "net.fabricmc", name = "sponge-mixin", version.ref = "sponge-mixin" }
-resourceful-config = { group = "com.teamresourceful.resourcefulconfig", name = "resourcefulconfig-common-1.21", version.ref = "resourceful-config" }
