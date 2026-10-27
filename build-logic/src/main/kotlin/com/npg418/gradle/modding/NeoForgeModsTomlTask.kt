@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.npg418.gradle.modding
 
 import com.electronwill.nightconfig.core.Config
@@ -66,15 +68,15 @@ abstract class NeoForgeModsToml @Inject constructor(private val objects: ObjectF
     fun modproperties(modId: String, vararg properties: Pair<String, String>) = modproperties(modId, mapOf(*properties))
 
     fun modproperties(modId: String, properties: Map<String, String>) = modproperties.register(modId) {
-        putAll(properties)
+        values.putAll(properties)
     }
 
-    @get:Input
+    @get:Nested
     abstract val accessTransformers: ListProperty<NeoForgeAccessTransformerSpec>
 
     fun accessTransformer(file: String) = create(accessTransformers) { this.file.set(file) }
 
-    @get:Input
+    @get:Nested
     abstract val mixins: ListProperty<NeoForgeMixinSpec>
 
     fun mixin(config: String) = create(mixins) { this.config.set(config) }
@@ -98,23 +100,19 @@ abstract class NeoForgeModsToml @Inject constructor(private val objects: ObjectF
         put("showAsDataPack", showAsDataPack)
         put("services", services)
         put("properties", properties.map { props ->
-            config {
-                props.forEach { (k, v) ->
-                    set(k, v)
+            if (props.isNotEmpty()) {
+                config {
+                    props.forEach { (k, v) -> set(listOf(k), v) }
                 }
-            }
+            } else null
         })
         put("issueTrackerURL", issueTrackerURL)
         put("mods", mods.map { modSpecs -> modSpecs.map { it.toConfig() } })
         putNamed("features", features) { it.toConfig() }
-        putNamed("modproperties", modproperties) { spec ->
-            config {
-                spec.forEach { (k, v) -> set(listOf(k), v) }
-            }
-        }
+        putNamed("modproperties", modproperties) { it.toConfig() }
         put("accessTransformers", accessTransformers.map { specs -> specs.map { it.toConfig() } })
         put("mixins", mixins.map { mixinSpecs -> mixinSpecs.map { it.toConfig() } })
-        putNamed("dependencies", dependencies) { specs -> specs.map { it.toConfig() } }
+        putNamed("dependencies", dependencies) { it.toConfig() }
     }
 }
 
@@ -201,10 +199,16 @@ abstract class NeoForgeModFeaturesSpec @Inject constructor(private val modId: St
     }
 }
 
-abstract class NeoForgeModPropertiesSpec @Inject constructor(private val modId: String) : HashMap<String, String>(),
-    Named {
+abstract class NeoForgeModPropertiesSpec @Inject constructor(private val modId: String) : Named {
     @Internal
     override fun getName(): String = modId
+
+    @get:Input
+    abstract val values: MapProperty<String, String>
+
+    internal fun toConfig() = config {
+        values.get().forEach { (k, v) -> set(listOf(k), v) }
+    }
 }
 
 abstract class NeoForgeAccessTransformerSpec @Inject constructor() {
@@ -268,25 +272,29 @@ abstract class NeoForgeModDependencySpec @Inject constructor() {
 abstract class NeoForgeModDependenciesSpec @Inject constructor(
     private val modId: String,
     private val objects: ObjectFactory,
-) : ArrayList<NeoForgeModDependencySpec>(), Named {
+) : Named {
     @Internal
     override fun getName(): String = modId
 
+    @get:Nested
+    abstract val specs: ListProperty<NeoForgeModDependencySpec>
+
     fun depends(modId: String, action: Action<in NeoForgeModDependencySpec>? = null) {
-        add(objects.newInstance<NeoForgeModDependencySpec>().also {
+        specs.add(objects.newInstance<NeoForgeModDependencySpec>().also {
             it.modId.set(modId)
             action?.execute(it)
         })
     }
+
+    internal fun toConfig() = specs.get().map { it.toConfig() }
 }
 
 private fun config(block: Config.() -> Unit): Config = TomlFormat.newConfig().apply(block)
 private fun <T : Any> Config.put(key: String, provider: Provider<T>) {
-    provider.orNull?.let {
-        if (it is ListProperty<*> && it.get().isEmpty()) return@let
-        if (it is MapProperty<*, *> && it.get().isEmpty()) return@let
-        set<T>(key, it)
-    }
+    val value = provider.orNull ?: return
+    if (value is Collection<*> && value.isEmpty()) return
+    if (value is Map<*, *> && value.isEmpty()) return
+    set<T>(key, value)
 }
 
 private fun <T : Named> Config.putNamed(key: String, items: Iterable<T>, convert: (T) -> Any) {
@@ -296,6 +304,7 @@ private fun <T : Named> Config.putNamed(key: String, items: Iterable<T>, convert
     })
 }
 
+@CacheableTask
 abstract class NeoForgeModsTomlTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty

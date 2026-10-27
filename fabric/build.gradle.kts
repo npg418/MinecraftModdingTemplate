@@ -1,9 +1,7 @@
 import com.npg418.gradle.modding.prop
+import com.npg418.gradle.modding.registerMetadataTask
 import com.npg418.gradle.modding.versionRange
 import net.fabricmc.loom.task.FabricModJsonV1Task
-import org.gradle.plugins.ide.idea.model.IdeaModel
-import org.jetbrains.gradle.ext.settings
-import org.jetbrains.gradle.ext.taskTriggers
 
 plugins {
     alias(conventions.plugins.common.convention)
@@ -86,17 +84,7 @@ val generateModJson = tasks.register<FabricModJsonV1Task>("generateModJson") {
         depends("fabric-language-kotlin", fabricLibs.fabric.kotlin.versionRange.map(::mavenToFabric).get())
     }
 }
-rootProject.plugins.withId(libs.plugins.idea.ext.get().pluginId) {
-    rootProject.extensions.configure<IdeaModel> {
-        project {
-            settings {
-                taskTriggers {
-                    afterSync(generateModJson)
-                }
-            }
-        }
-    }
-}
+registerMetadataTask(generateModJson)
 
 repositories {
     maven("https://maven.parchmentmc.org") {

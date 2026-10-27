@@ -1,6 +1,7 @@
 package com.npg418.gradle.modding
 
 import libs
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -48,4 +49,9 @@ idea {
         isDownloadJavadoc = true
         isDownloadSources = true
     }
+}
+
+val modulePrefix = project.name
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions.moduleName.set("${modulePrefix}_$name")
 }

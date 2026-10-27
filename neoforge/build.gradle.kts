@@ -1,7 +1,4 @@
 import com.npg418.gradle.modding.*
-import org.gradle.plugins.ide.idea.model.IdeaModel
-import org.jetbrains.gradle.ext.settings
-import org.jetbrains.gradle.ext.taskTriggers
 import org.slf4j.event.Level
 
 plugins {
@@ -96,17 +93,7 @@ val generateModsToml = tasks.register<NeoForgeModsTomlTask>("generateModsToml") 
         }
     }
 }
-rootProject.plugins.withId(libs.plugins.idea.ext.get().pluginId) {
-    rootProject.extensions.configure<IdeaModel> {
-        project {
-            settings {
-                taskTriggers {
-                    afterSync(generateModsToml)
-                }
-            }
-        }
-    }
-}
+registerMetadataTask(generateModsToml)
 
 repositories {
     maven("https://thedarkcolour.github.io/KotlinForForge") {
