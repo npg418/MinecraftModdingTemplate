@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.idea.ext)
+    implementation(libs.nightconfig.toml)
 }

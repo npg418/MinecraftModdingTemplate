@@ -1,3 +1,4 @@
+import com.npg418.gradle.modding.*
 import org.slf4j.event.Level
 
 plugins {
@@ -5,14 +6,8 @@ plugins {
     alias(libs.plugins.moddev.gradle)
 }
 
-expandProperties {
-    put("loader_version_range", neoforgeLibs.versions.kotlinforforge.range)
-    put("neoforge_version_range", neoforgeLibs.versions.neoforge.range)
-    put("minecraft_version_range", neoforgeLibs.versions.minecraft.range)
-}
-
 neoForge {
-    version = neoforgeLibs.versions.neoforge.asProvider().get()
+    version = neoforgeLibs.neoforge.version.get()
 
     parchment {
         minecraftVersion = libs.versions.parchment.minecraft
@@ -22,19 +17,19 @@ neoForge {
     runs {
         create("client") {
             client()
-            systemProperty("neoforge.enabledGameTestNamespaces", providers.gradleProperty("mod_id").get())
+            systemProperty("neoforge.enabledGameTestNamespaces", prop("mod_id").get())
         }
 
         create("server") {
             server()
-            systemProperty("neoforge.enabledGameTestNamespaces", providers.gradleProperty("mod_id").get())
+            systemProperty("neoforge.enabledGameTestNamespaces", prop("mod_id").get())
         }
 
         create("datagen") {
             data()
             programArguments.addAll(
                 "--mod",
-                providers.gradleProperty("mod_id").get(),
+                prop("mod_id").get(),
                 "--all",
                 "--output",
                 file("src/generated/resources/").absolutePath,
@@ -54,9 +49,47 @@ neoForge {
     }
 
     mods {
-        register(providers.gradleProperty("mod_id").get()) {
+        register(prop("mod_id").get()) {
             sourceSet(sourceSets.main.get())
             sourceSet(project(":common").sourceSets.main.get())
+        }
+    }
+}
+
+val generateModsToml = tasks.register<NeoForgeModsTomlTask>("generateModsToml") {
+    description = "Generates neoforge mod metadata"
+    outputFile = layout.buildDirectory.file("generated/resources/META-INF/neoforge.mods.toml")
+
+    toml {
+        modLoader = "kotlinforforge"
+        loaderVersion = neoforgeLibs.kotlinforforge.versionRange
+        license = prop("mod_license")
+
+        mod(prop("mod_id").get()) {
+            version = prop("mod_version")
+            displayName = prop("mod_name")
+            authors = prop("mod_authors")
+            description = prop("mod_description")
+        }
+
+        prop("mod_id").get().let {
+            mixin("$it.mixins.json")
+            mixin("$it.neoforge.mixins.json")
+        }
+
+        dependencies(prop("mod_id").get()) {
+            depends("neoforge") {
+                type = DependencyType.REQUIRED
+                versionRange = neoforgeLibs.neoforge.versionRange
+                ordering = Ordering.NONE
+                side = Side.BOTH
+            }
+            depends("minecraft") {
+                type = DependencyType.REQUIRED
+                versionRange = libs.minecraft.versionRange
+                ordering = Ordering.NONE
+                side = Side.BOTH
+            }
         }
     }
 }
@@ -74,5 +107,6 @@ dependencies {
     implementation(projects.common)
 
     implementation(neoforgeLibs.kotlinforforge)
+
     runtimeOnly(neoforgeLibs.configured)
 }
