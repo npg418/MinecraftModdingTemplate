@@ -1,11 +1,13 @@
+import com.npg418.gradle.modding.version
+
 plugins {
     alias(conventions.plugins.common.convention)
-    alias(libs.plugins.moddev.gradle)
+    alias(libs.plugins.moddev.gradle.legacy)
     alias(libs.plugins.fabric.loom.companion)
 }
 
-neoForge {
-    neoFormVersion = libs.versions.neoform.get()
+legacyForge {
+    mcpVersion = libs.minecraft.version.get()
 
     parchment {
         minecraftVersion = libs.versions.parchment.minecraft

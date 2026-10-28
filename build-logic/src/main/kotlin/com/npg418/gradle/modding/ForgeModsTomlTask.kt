@@ -19,7 +19,7 @@ import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
-abstract class NeoForgeModsToml @Inject constructor(private val objects: ObjectFactory) {
+abstract class ForgeModsToml @Inject constructor(private val objects: ObjectFactory) {
     @get:Input
     abstract val modLoader: Property<String>
 
@@ -50,20 +50,20 @@ abstract class NeoForgeModsToml @Inject constructor(private val objects: ObjectF
     abstract val issueTrackerURL: Property<String>
 
     @get:Nested
-    abstract val mods: ListProperty<NeoForgeModSpec>
+    abstract val mods: ListProperty<ForgeModSpec>
 
-    fun mod(modId: String, action: Action<in NeoForgeModSpec>? = null) = create(mods) {
+    fun mod(modId: String, action: Action<in ForgeModSpec>? = null) = create(mods) {
         this.modId.set(modId)
         action?.execute(this)
     }
 
     @get:Nested
-    abstract val features: NamedDomainObjectContainer<NeoForgeModFeaturesSpec>
+    abstract val features: NamedDomainObjectContainer<ForgeModFeaturesSpec>
 
-    fun features(modId: String, action: Action<in NeoForgeModFeaturesSpec>) = features.register(modId, action)
+    fun features(modId: String, action: Action<in ForgeModFeaturesSpec>) = features.register(modId, action)
 
     @get:Nested
-    abstract val modproperties: NamedDomainObjectContainer<NeoForgeModPropertiesSpec>
+    abstract val modproperties: NamedDomainObjectContainer<ForgeModPropertiesSpec>
 
     fun modproperties(modId: String, vararg properties: Pair<String, String>) = modproperties(modId, mapOf(*properties))
 
@@ -72,12 +72,12 @@ abstract class NeoForgeModsToml @Inject constructor(private val objects: ObjectF
     }
 
     @get:Nested
-    abstract val accessTransformers: ListProperty<NeoForgeAccessTransformerSpec>
+    abstract val accessTransformers: ListProperty<ForgeAccessTransformerSpec>
 
     fun accessTransformer(file: String) = create(accessTransformers) { this.file.set(file) }
 
     @get:Nested
-    abstract val mixins: ListProperty<NeoForgeMixinSpec>
+    abstract val mixins: ListProperty<ForgeMixinSpec>
 
     fun mixin(config: String) = create(mixins) { this.config.set(config) }
 
@@ -88,9 +88,9 @@ abstract class NeoForgeModsToml @Inject constructor(private val objects: ObjectF
     }
 
     @get:Nested
-    abstract val dependencies: NamedDomainObjectContainer<NeoForgeModDependenciesSpec>
+    abstract val dependencies: NamedDomainObjectContainer<ForgeModDependenciesSpec>
 
-    fun dependencies(modId: String, action: Action<NeoForgeModDependenciesSpec>) = dependencies.register(modId, action)
+    fun dependencies(modId: String, action: Action<ForgeModDependenciesSpec>) = dependencies.register(modId, action)
 
     internal fun toConfig() = config {
         put("modLoader", modLoader)
@@ -116,7 +116,7 @@ abstract class NeoForgeModsToml @Inject constructor(private val objects: ObjectF
     }
 }
 
-abstract class NeoForgeModSpec @Inject constructor() {
+abstract class ForgeModSpec @Inject constructor() {
     @get:Input
     abstract val modId: Property<String>
 
@@ -181,7 +181,7 @@ abstract class NeoForgeModSpec @Inject constructor() {
     }
 }
 
-abstract class NeoForgeModFeaturesSpec @Inject constructor(private val modId: String) : Named {
+abstract class ForgeModFeaturesSpec @Inject constructor(private val modId: String) : Named {
     @Internal
     override fun getName(): String = modId
 
@@ -199,7 +199,7 @@ abstract class NeoForgeModFeaturesSpec @Inject constructor(private val modId: St
     }
 }
 
-abstract class NeoForgeModPropertiesSpec @Inject constructor(private val modId: String) : Named {
+abstract class ForgeModPropertiesSpec @Inject constructor(private val modId: String) : Named {
     @Internal
     override fun getName(): String = modId
 
@@ -211,7 +211,7 @@ abstract class NeoForgeModPropertiesSpec @Inject constructor(private val modId: 
     }
 }
 
-abstract class NeoForgeAccessTransformerSpec @Inject constructor() {
+abstract class ForgeAccessTransformerSpec @Inject constructor() {
     @get:Input
     @get:Optional
     abstract val file: Property<String>
@@ -221,7 +221,7 @@ abstract class NeoForgeAccessTransformerSpec @Inject constructor() {
     }
 }
 
-abstract class NeoForgeMixinSpec @Inject constructor() {
+abstract class ForgeMixinSpec @Inject constructor() {
     @get:Input
     @get:Optional
     abstract val config: Property<String>
@@ -234,7 +234,7 @@ abstract class NeoForgeMixinSpec @Inject constructor() {
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, DISCOURAGED }
 enum class Ordering { NONE, BEFORE, AFTER }
 enum class Side { BOTH, CLIENT, SERVER }
-abstract class NeoForgeModDependencySpec @Inject constructor() {
+abstract class ForgeModDependencySpec @Inject constructor() {
 
     @get:Input
     abstract val modId: Property<String>
@@ -269,7 +269,7 @@ abstract class NeoForgeModDependencySpec @Inject constructor() {
     }
 }
 
-abstract class NeoForgeModDependenciesSpec @Inject constructor(
+abstract class ForgeModDependenciesSpec @Inject constructor(
     private val modId: String,
     private val objects: ObjectFactory,
 ) : Named {
@@ -277,10 +277,10 @@ abstract class NeoForgeModDependenciesSpec @Inject constructor(
     override fun getName(): String = modId
 
     @get:Nested
-    abstract val specs: ListProperty<NeoForgeModDependencySpec>
+    abstract val specs: ListProperty<ForgeModDependencySpec>
 
-    fun depends(modId: String, action: Action<in NeoForgeModDependencySpec>? = null) {
-        specs.add(objects.newInstance<NeoForgeModDependencySpec>().also {
+    fun depends(modId: String, action: Action<in ForgeModDependencySpec>? = null) {
+        specs.add(objects.newInstance<ForgeModDependencySpec>().also {
             it.modId.set(modId)
             action?.execute(it)
         })
@@ -305,14 +305,14 @@ private fun <T : Named> Config.putNamed(key: String, items: Iterable<T>, convert
 }
 
 @CacheableTask
-abstract class NeoForgeModsTomlTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
+abstract class ForgeModsTomlTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
     @get:Nested
-    val toml: NeoForgeModsToml = objects.newInstance(NeoForgeModsToml::class.java)
+    val toml: ForgeModsToml = objects.newInstance(ForgeModsToml::class.java)
 
-    fun toml(action: Action<in NeoForgeModsToml>) = action.execute(toml)
+    fun toml(action: Action<in ForgeModsToml>) = action.execute(toml)
 
     @TaskAction
     fun generate() {

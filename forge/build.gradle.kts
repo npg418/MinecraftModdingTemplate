@@ -3,11 +3,11 @@ import org.slf4j.event.Level
 
 plugins {
     alias(conventions.plugins.common.convention)
-    alias(libs.plugins.moddev.gradle)
+    alias(libs.plugins.moddev.gradle.legacy)
 }
 
-neoForge {
-    version = neoforgeLibs.neoforge.version.get()
+legacyForge {
+    version = "${libs.minecraft.version.get()}-${forgeLibs.forge.version.get()}"
 
     parchment {
         minecraftVersion = libs.versions.parchment.minecraft
@@ -17,12 +17,12 @@ neoForge {
     runs {
         create("client") {
             client()
-            systemProperty("neoforge.enabledGameTestNamespaces", prop("mod_id").get())
+            systemProperty("forge.enabledGameTestNamespaces", prop("mod_id").get())
         }
 
         create("server") {
             server()
-            systemProperty("neoforge.enabledGameTestNamespaces", prop("mod_id").get())
+            systemProperty("forge.enabledGameTestNamespaces", prop("mod_id").get())
         }
 
         create("datagen") {
@@ -56,13 +56,13 @@ neoForge {
     }
 }
 
-val generateModsToml = tasks.register<NeoForgeModsTomlTask>("generateModsToml") {
-    description = "Generates neoforge mod metadata"
-    outputFile = generatedResourcesDir.map { it.file("META-INF/neoforge.mods.toml") }
+val generateModsToml = tasks.register<ForgeModsTomlTask>("generateModsToml") {
+    description = "Generates forge mod metadata"
+    outputFile = generatedResourcesDir.map { it.file("META-INF/mods.toml") }
 
     toml {
         modLoader = "kotlinforforge"
-        loaderVersion = neoforgeLibs.kotlinforforge.versionRange
+        loaderVersion = forgeLibs.kotlinforforge.versionRange
         license = prop("mod_license")
 
         mod(prop("mod_id").get()) {
@@ -74,13 +74,13 @@ val generateModsToml = tasks.register<NeoForgeModsTomlTask>("generateModsToml") 
 
         prop("mod_id").get().let {
             mixin("$it.mixins.json")
-            mixin("$it.neoforge.mixins.json")
+            mixin("$it.forge.mixins.json")
         }
 
         dependencies(prop("mod_id").get()) {
-            depends("neoforge") {
+            depends("forge") {
                 type = DependencyType.REQUIRED
-                versionRange = neoforgeLibs.neoforge.versionRange
+                versionRange = forgeLibs.forge.versionRange
                 ordering = Ordering.NONE
                 side = Side.BOTH
             }
@@ -107,7 +107,7 @@ repositories {
 dependencies {
     implementation(projects.common)
 
-    implementation(neoforgeLibs.kotlinforforge)
+    implementation(forgeLibs.kotlinforforge)
 
-    runtimeOnly(neoforgeLibs.configured)
+    runtimeOnly(forgeLibs.configured)
 }

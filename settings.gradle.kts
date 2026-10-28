@@ -13,8 +13,8 @@ plugins {
 
 dependencyResolutionManagement {
     versionCatalogs {
-        register("neoforgeLibs") {
-            from(files("gradle/neoforgeLibs.versions.toml"))
+        register("forgeLibs") {
+            from(files("gradle/forgeLibs.versions.toml"))
         }
         register("fabricLibs") {
             from(files("gradle/fabricLibs.versions.toml"))
@@ -29,5 +29,5 @@ rootProject.name = "ExampleMod"
 includeBuild("build-logic")
 
 include("common")
-include("neoforge")
+include("forge")
 include("fabric")
