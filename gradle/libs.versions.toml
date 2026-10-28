@@ -9,7 +9,7 @@ minecraft = { prefer = "1.20.1", strictly = "[1.20,1.20.1]" }
 moddev-gradle = "2.0.148"
 
 # https://fabricmc.net/develop
-fabric-loom = "1.17-SNAPSHOT"
+fabric-loom = "1.19-SNAPSHOT"
 
 # https://parchmentmc.org/docs/getting-started
 parchment-minecraft = "1.20.1"

@@ -2,6 +2,9 @@
 # https://files.minecraftforge.net/net/minecraftforge/forge/
 forge = { prefer = "47.4.28", strictly = "[47,)" }
 
+# https://github.com/SpongePowered/Mixin/releases
+mixin = "0.8.5"
+
 # https://docs.google.com/spreadsheets/d/1v8K90PBa5qPFrlHBA8PSqlBTYCcp078o5E2XQbt5BUs/edit?usp=sharing
 kotlinforforge = { prefer = "4.12.0", strictly = "[4,5)" }
 
@@ -11,6 +14,7 @@ configured = "7276576" # v2.6.3
 [libraries]
 #noinspection UnusedVersionCatalogEntry
 forge = { group = "net.minecraftforge", name = "forge", version.ref = "forge" }
+mixin = { group = "org.spongepowered", name = "mixin", version.ref = "mixin" }
 
 kotlinforforge = { group = "thedarkcolour", name = "kotlinforforge-neoforge", version.ref = "kotlinforforge" }
 

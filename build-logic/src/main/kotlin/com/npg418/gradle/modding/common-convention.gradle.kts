@@ -28,7 +28,12 @@ val hotswapJvmArgs = provider {
         .copyRecursive()
         .resolvedConfiguration
         .resolvedArtifacts
-        .first { it.moduleVersion.id.group == "net.fabricmc" && it.moduleVersion.id.name == "sponge-mixin" }
+        .first { artifact ->
+            artifact.moduleVersion.id.let {
+                it.group == "net.fabricmc" && it.name == "sponge-mixin"
+                        || it.group == "org.spongepowered" && it.name == "mixin"
+            }
+        }
         .file.absolutePath
 
     listOf(

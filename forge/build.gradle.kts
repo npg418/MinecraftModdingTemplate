@@ -72,10 +72,10 @@ val generateModsToml = tasks.register<ForgeModsTomlTask>("generateModsToml") {
             description = prop("mod_description")
         }
 
-        prop("mod_id").get().let {
-            mixin("$it.mixins.json")
-            mixin("$it.forge.mixins.json")
-        }
+//        prop("mod_id").get().let {
+//            mixin("$it.mixins.json")
+//            mixin("$it.forge.mixins.json")
+//        }
 
         dependencies(prop("mod_id").get()) {
             depends("forge") {
@@ -94,6 +94,19 @@ val generateModsToml = tasks.register<ForgeModsTomlTask>("generateModsToml") {
     }
 }
 registerMetadataTask(generateModsToml)
+prop("mod_id").get().let {
+    mixin {
+        add(sourceSets.main.get(), "$it.mixins.refmap.json")
+        config("$it.mixins.json")
+        config("$it.forge.mixins.json")
+    }
+    tasks.jar {
+        manifest.attributes(
+            "MixinConfigs" to "$it.mixins.json",
+            "MixinConfigs" to "$it.forge.mixins.json"
+        )
+    }
+}
 
 repositories {
     maven("https://thedarkcolour.github.io/KotlinForForge") {
@@ -108,6 +121,7 @@ dependencies {
     implementation(projects.common)
 
     implementation(forgeLibs.kotlinforforge)
+    annotationProcessor(variantOf(forgeLibs.mixin) { classifier("processor") })
 
     runtimeOnly(forgeLibs.configured)
 }
