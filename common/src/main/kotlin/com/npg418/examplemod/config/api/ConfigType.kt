@@ -6,5 +6,5 @@ enum class ConfigType {
     COMMON,
     CLIENT,
     SERVER,
-    STARTUP
+//    STARTUP
 }

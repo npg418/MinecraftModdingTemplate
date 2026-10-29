@@ -44,7 +44,7 @@ legacyForge {
 
             jvmArguments.addAll(hotswapJvmArgs)
 
-            ideName = "NeoForge: Run $name"
+            ideName = "Forge: Run $name"
         }
     }
 
@@ -72,20 +72,15 @@ val generateModsToml = tasks.register<ForgeModsTomlTask>("generateModsToml") {
             description = prop("mod_description")
         }
 
-//        prop("mod_id").get().let {
-//            mixin("$it.mixins.json")
-//            mixin("$it.forge.mixins.json")
-//        }
-
         dependencies(prop("mod_id").get()) {
             depends("forge") {
-                type = DependencyType.REQUIRED
+                mandatory = true
                 versionRange = forgeLibs.forge.versionRange
                 ordering = Ordering.NONE
                 side = Side.BOTH
             }
             depends("minecraft") {
-                type = DependencyType.REQUIRED
+                mandatory = true
                 versionRange = libs.minecraft.versionRange
                 ordering = Ordering.NONE
                 side = Side.BOTH
@@ -96,14 +91,13 @@ val generateModsToml = tasks.register<ForgeModsTomlTask>("generateModsToml") {
 registerMetadataTask(generateModsToml)
 prop("mod_id").get().let {
     mixin {
-        add(sourceSets.main.get(), "$it.mixins.refmap.json")
+        add(sourceSets.main.get(), "$it.refmap.json")
         config("$it.mixins.json")
         config("$it.forge.mixins.json")
     }
     tasks.jar {
         manifest.attributes(
-            "MixinConfigs" to "$it.mixins.json",
-            "MixinConfigs" to "$it.forge.mixins.json"
+            "MixinConfigs" to "$it.mixins.json,$it.forge.mixins.json"
         )
     }
 }

@@ -1,33 +1,33 @@
 package com.npg418.examplemod
 
-import com.npg418.examplemod.config.NeoForgeConfigBuilder
+import com.npg418.examplemod.config.ForgeConfigBuilder
 import com.npg418.examplemod.datagen.ModItemModelProvider
 import com.npg418.examplemod.datagen.ModLanguageProvider
 import com.npg418.examplemod.init.CONFIGS
 import com.npg418.examplemod.init.ITEM_MAP
-import net.neoforged.bus.api.IEventBus
-import net.neoforged.bus.api.SubscribeEvent
-import net.neoforged.fml.ModContainer
-import net.neoforged.fml.common.Mod
-import net.neoforged.neoforge.data.event.GatherDataEvent
-import net.neoforged.neoforge.registries.DeferredRegister
+import net.minecraft.world.item.Item
+import net.minecraftforge.data.event.GatherDataEvent
+import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
+import net.minecraftforge.registries.DeferredRegister
+import net.minecraftforge.registries.ForgeRegistries
+import thedarkcolour.kotlinforforge.forge.MOD_BUS
 
 
 @Mod(ExampleMod.MODID)
-class NeoForgeMain(eventBus: IEventBus, container: ModContainer) {
+class ForgeMain(context: FMLJavaModLoadingContext) {
     companion object {
-        val ITEMS: DeferredRegister.Items = DeferredRegister.createItems(ExampleMod.MODID)
+        val ITEMS: DeferredRegister<Item> = DeferredRegister.create(ForgeRegistries.ITEMS, ExampleMod.MODID)
     }
 
     init {
-        ExampleMod.LOGGER.debug("Hello from Neoforge Mod!")
+        ExampleMod.LOGGER.debug("Hello from Forge Mod!")
 
-        eventBus.register(this)
-
-        CONFIGS.forEach { NeoForgeConfigBuilder(it).register(container) }
+        CONFIGS.forEach { ForgeConfigBuilder(it).register(context) }
 
         ITEM_MAP.forEach(ITEMS::register)
-        ITEMS.register(eventBus)
+        ITEMS.register(MOD_BUS)
     }
 
     @SubscribeEvent

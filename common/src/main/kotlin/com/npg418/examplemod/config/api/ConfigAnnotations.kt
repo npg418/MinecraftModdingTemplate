@@ -18,6 +18,6 @@ annotation class Translation(val value: String)
 @MustBeDocumented
 annotation class WorldRestart
 
-@Target(AnnotationTarget.PROPERTY)
-@MustBeDocumented
-annotation class GameRestart
+//@Target(AnnotationTarget.PROPERTY)
+//@MustBeDocumented
+//annotation class GameRestart

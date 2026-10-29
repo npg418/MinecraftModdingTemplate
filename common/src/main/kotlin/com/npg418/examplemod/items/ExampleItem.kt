@@ -1,11 +1,9 @@
 package com.npg418.examplemod.items
 
 import com.npg418.examplemod.config.CommonConfig
-import com.npg418.examplemod.config.StartupConfig
 import net.minecraft.network.chat.Component
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResultHolder
-import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -19,7 +17,7 @@ enum class GreetingLang(val greet: String) {
     KR("안녕하세요, ")
 }
 
-class ExampleItem : Item(Properties().stacksTo(1).durability(StartupConfig.Item.exampleItemDurability)) {
+class ExampleItem : Item(Properties().stacksTo(1).durability(64)) {
     override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack?> {
         val stack = player.getItemInHand(usedHand)
         if (level.isClientSide) {
@@ -30,8 +28,7 @@ class ExampleItem : Item(Properties().stacksTo(1).durability(StartupConfig.Item.
                 false
             )
         } else {
-            val slot = LivingEntity.getSlotForHand(usedHand)
-            stack.hurtAndBreak(1, player, slot)
+            stack.hurtAndBreak(1, player) { it.broadcastBreakEvent(usedHand) }
         }
         return InteractionResultHolder.success(stack)
     }

@@ -2,10 +2,11 @@
   "required": true,
   "package": "com.npg418.examplemod.mixin",
   "compatibilityLevel": "JAVA_17",
+  "refmap": "examplemod.refmap.json",
   "mixins": [
   ],
   "client": [
-    "NeoForgeTitleScreenMixin"
+    "ForgeTitleScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -2,25 +2,25 @@ package com.npg418.examplemod.config
 
 import com.mojang.logging.LogUtils
 import com.npg418.examplemod.config.api.*
-import net.neoforged.fml.ModContainer
-import net.neoforged.fml.config.ModConfig
-import net.neoforged.neoforge.common.ModConfigSpec
+import net.minecraftforge.common.ForgeConfigSpec
+import net.minecraftforge.fml.ModLoadingContext
+import net.minecraftforge.fml.config.ModConfig
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 
-class NeoForgeConfigBuilder(private val spec: ConfigSpec) : ConfigTreeWalker(LOGGER) {
+class ForgeConfigBuilder(private val spec: ConfigSpec) : ConfigTreeWalker(LOGGER) {
     companion object {
         private val LOGGER = LogUtils.getLogger()
     }
 
-    private val builder = ModConfigSpec.Builder()
+    private val builder = ForgeConfigSpec.Builder()
 
-    fun register(container: ModContainer) {
+    fun register(context: ModLoadingContext) {
         walkRoot(spec::class).fold(
             onSuccess = {
-                container.registerConfig(ModConfig.Type.valueOf(spec.configType.name), builder.build())
+                context.registerConfig(ModConfig.Type.valueOf(spec.configType.name), builder.build())
             },
             onFailure = {
                 LOGGER.error("An error occurred while registering {}.", spec::class.simpleName, it)
@@ -54,7 +54,7 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) : ConfigTreeWalker(LOG
     ) {
         applyCommonMeta(property)
         property.findAnnotation<WorldRestart>()?.let { builder.worldRestart() }
-        property.findAnnotation<GameRestart>()?.let { builder.gameRestart() }
+//        property.findAnnotation<GameRestart>()?.let { builder.gameRestart() }
 
         when (delegate) {
             is NormalConfigProperty<*> -> bind(name, delegate)
@@ -65,7 +65,7 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) : ConfigTreeWalker(LOG
         }
     }
 
-    private fun <T : Any> ModConfigSpec.ConfigValue<T>.bind(d: ConfigProperty<T>) {
+    private fun <T : Any> ForgeConfigSpec.ConfigValue<T>.bind(d: ConfigProperty<T>) {
         d.getter = this::get
         d.setter = this::set
     }
@@ -86,9 +86,9 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) : ConfigTreeWalker(LOG
 
     private fun <E : Any> bind(name: String, d: ListConfigProperty<E>) {
         if (d.allowEmpty) {
-            builder.defineListAllowEmpty(name, d.default, d.newElement, d.elementValidator)
+            builder.defineListAllowEmpty(name, d.default, /* d.newElement, */ d.elementValidator)
         } else {
-            builder.defineList(name, d.default, d.newElement, d.elementValidator)
+            builder.defineList(name, d.default, /* d.newElement, */ d.elementValidator)
         }.bind(d)
     }
 

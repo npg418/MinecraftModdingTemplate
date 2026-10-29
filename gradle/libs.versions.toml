@@ -6,7 +6,7 @@ nightconfig = "3.9.0"
 minecraft = { prefer = "1.20.1", strictly = "[1.20,1.20.1]" }
 
 # https://projects.neoforged.net/neoforged/ModDevGradle
-moddev-gradle = "2.0.148"
+moddev-gradle = "2.0.141"
 
 # https://fabricmc.net/develop
 fabric-loom = "1.19-SNAPSHOT"

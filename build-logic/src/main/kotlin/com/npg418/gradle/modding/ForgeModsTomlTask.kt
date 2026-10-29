@@ -231,7 +231,6 @@ abstract class ForgeMixinSpec @Inject constructor() {
     }
 }
 
-enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, DISCOURAGED }
 enum class Ordering { NONE, BEFORE, AFTER }
 enum class Side { BOTH, CLIENT, SERVER }
 abstract class ForgeModDependencySpec @Inject constructor() {
@@ -241,11 +240,7 @@ abstract class ForgeModDependencySpec @Inject constructor() {
 
     @get:Input
     @get:Optional
-    abstract val type: Property<DependencyType>
-
-    @get:Input
-    @get:Optional
-    abstract val reason: Property<String>
+    abstract val mandatory: Property<Boolean>
 
     @get:Input
     @get:Optional
@@ -261,8 +256,7 @@ abstract class ForgeModDependencySpec @Inject constructor() {
 
     internal fun toConfig() = config {
         put("modId", modId)
-        put("type", type.map { it.name.lowercase() })
-        put("reason", reason)
+        put("mandatory", mandatory)
         put("versionRange", versionRange)
         put("ordering", ordering.map { it.name })
         put("side", side.map { it.name })

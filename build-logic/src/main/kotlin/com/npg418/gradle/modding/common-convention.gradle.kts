@@ -24,21 +24,21 @@ java {
 }
 
 val hotswapJvmArgs = provider {
-    val mixinJar = configurations.runtimeClasspath.get()
-        .copyRecursive()
-        .resolvedConfiguration
-        .resolvedArtifacts
-        .first { artifact ->
-            artifact.moduleVersion.id.let {
-                it.group == "net.fabricmc" && it.name == "sponge-mixin"
-                        || it.group == "org.spongepowered" && it.name == "mixin"
-            }
-        }
-        .file.absolutePath
+//    val mixinJar = configurations.runtimeClasspath.get()
+//        .copyRecursive()
+//        .resolvedConfiguration
+//        .resolvedArtifacts
+//        .first { artifact ->
+//            artifact.moduleVersion.id.let {
+//                it.group == "net.fabricmc" && it.name == "sponge-mixin"
+//                        || it.group == "org.spongepowered" && it.name == "mixin"
+//            }
+//        }
+//        .file.absolutePath
 
     listOf(
         "-XX:+AllowEnhancedClassRedefinition",
-        "-javaagent:$mixinJar"
+//        "-javaagent:$mixinJar"
     )
 }
 extensions.add<Provider<List<String>>>("hotswapJvmArgs", hotswapJvmArgs)
