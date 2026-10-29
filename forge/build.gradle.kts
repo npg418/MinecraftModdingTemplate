@@ -88,7 +88,16 @@ val generateModsToml = tasks.register<ForgeModsTomlTask>("generateModsToml") {
         }
     }
 }
-registerMetadataTask(generateModsToml)
+val generatePackMcmeta = tasks.register<PackMcmetaTask>("generatePackMcmeta") {
+    description = "Generates resource pack metadata"
+    outputFile = generatedResourcesDir.map { it.file("pack.mcmeta") }
+
+    pack {
+        description = "${prop("mod_name").get()} resource"
+        packFormat = 15
+    }
+}
+registerMetadataTask(generateModsToml, generatePackMcmeta)
 prop("mod_id").get().let {
     mixin {
         add(sourceSets.main.get(), "$it.refmap.json")
@@ -117,5 +126,5 @@ dependencies {
     implementation(forgeLibs.kotlinforforge)
     annotationProcessor(variantOf(forgeLibs.mixin) { classifier("processor") })
 
-    runtimeOnly(forgeLibs.configured)
+    modRuntimeOnly(forgeLibs.configured)
 }

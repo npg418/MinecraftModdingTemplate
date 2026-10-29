@@ -20,15 +20,15 @@ val Provider<MinimalExternalModuleDependency>.version
 val Provider<MinimalExternalModuleDependency>.versionRange
     get() = map { it.versionConstraint.strictVersion }
 
-fun Project.registerMetadataTask(task: TaskProvider<*>) {
+fun Project.registerMetadataTask(vararg tasks: TaskProvider<*>) {
     tasks {
-        named("processResources") { dependsOn(task) }
-        named("sourcesJar") { dependsOn(task) }
+        named("processResources") { dependsOn(tasks) }
+        named("sourcesJar") { dependsOn(tasks) }
     }
 
     rootProject.plugins.withId(libs.plugins.idea.ext.get().pluginId) {
         rootProject.extensions.configure<IdeaModel> {
-            project { settings { taskTriggers { afterSync(task) } } }
+            project { settings { taskTriggers { afterSync(tasks) } } }
         }
     }
 }

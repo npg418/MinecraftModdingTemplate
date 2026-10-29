@@ -9,14 +9,14 @@ import net.minecraft.world.item.Item
 import net.minecraftforge.data.event.GatherDataEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
 import net.minecraftforge.registries.DeferredRegister
 import net.minecraftforge.registries.ForgeRegistries
+import thedarkcolour.kotlinforforge.forge.LOADING_CONTEXT
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
 
 
 @Mod(ExampleMod.MODID)
-class ForgeMain(context: FMLJavaModLoadingContext) {
+class ForgeMain {
     companion object {
         val ITEMS: DeferredRegister<Item> = DeferredRegister.create(ForgeRegistries.ITEMS, ExampleMod.MODID)
     }
@@ -24,7 +24,7 @@ class ForgeMain(context: FMLJavaModLoadingContext) {
     init {
         ExampleMod.LOGGER.debug("Hello from Forge Mod!")
 
-        CONFIGS.forEach { ForgeConfigBuilder(it).register(context) }
+        CONFIGS.forEach { ForgeConfigBuilder(it).register(LOADING_CONTEXT) }
 
         ITEM_MAP.forEach(ITEMS::register)
         ITEMS.register(MOD_BUS)
