@@ -22,13 +22,13 @@ val Provider<MinimalExternalModuleDependency>.versionRange
 
 fun Project.registerMetadataTask(vararg tasks: TaskProvider<*>) {
     tasks {
-        named("processResources") { dependsOn(tasks) }
-        named("sourcesJar") { dependsOn(tasks) }
+        named("processResources") { dependsOn(*tasks) }
+        named("sourcesJar") { dependsOn(*tasks) }
     }
 
     rootProject.plugins.withId(libs.plugins.idea.ext.get().pluginId) {
         rootProject.extensions.configure<IdeaModel> {
-            project { settings { taskTriggers { afterSync(tasks) } } }
+            project { settings { taskTriggers { afterSync(*tasks) } } }
         }
     }
 }
