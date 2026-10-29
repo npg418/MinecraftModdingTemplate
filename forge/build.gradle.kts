@@ -32,9 +32,9 @@ legacyForge {
                 prop("mod_id").get(),
                 "--all",
                 "--output",
-                file("src/generated/resources/").absolutePath,
+                file("src/main/generated").absolutePath,
                 "--existing",
-                file("src/main/resources/").absolutePath
+                file("src/main/resources").absolutePath
             )
         }
 
@@ -54,6 +54,10 @@ legacyForge {
             sourceSet(project(":common").sourceSets.main.get())
         }
     }
+}
+
+sourceSets.main {
+    resources.srcDir("src/main/generated")
 }
 
 val generateModsToml = tasks.register<ForgeModsTomlTask>("generateModsToml") {

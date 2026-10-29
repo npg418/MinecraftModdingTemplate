@@ -24,6 +24,8 @@ class ForgeMain {
     init {
         ExampleMod.LOGGER.debug("Hello from Forge Mod!")
 
+        MOD_BUS.register(this)
+
         CONFIGS.forEach { ForgeConfigBuilder(it).register(LOADING_CONTEXT) }
 
         ITEM_MAP.forEach(ITEMS::register)
