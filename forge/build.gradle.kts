@@ -1,5 +1,4 @@
 import com.npg418.gradle.modding.*
-import org.slf4j.event.Level
 
 plugins {
     alias(conventions.plugins.common.convention)
@@ -40,7 +39,7 @@ legacyForge {
 
         configureEach {
             systemProperty("forge.logging.markers", "REGISTRIES")
-            logLevel = Level.DEBUG
+            systemProperty("forge.logging.console.level", "debug")
 
             jvmArguments.addAll(hotswapJvmArgs)
 
