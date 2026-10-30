@@ -17,7 +17,7 @@ class FabricMain : ModInitializer {
         ITEM_MAP.forEach { (name, item) ->
             Registry.register(
                 BuiltInRegistries.ITEM,
-                ResourceLocation.fromNamespaceAndPath(ExampleMod.MODID, name),
+                ResourceLocation(ExampleMod.MODID, name),
                 item.get()
             )
         }
