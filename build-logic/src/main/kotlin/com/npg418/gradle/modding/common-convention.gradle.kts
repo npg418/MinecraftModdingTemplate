@@ -23,22 +23,15 @@ java {
     withJavadocJar()
 }
 
-val hotswapJvmArgs = provider {
-//    val mixinJar = configurations.runtimeClasspath.get()
-//        .copyRecursive()
-//        .resolvedConfiguration
-//        .resolvedArtifacts
-//        .first { artifact ->
-//            artifact.moduleVersion.id.let {
-//                it.group == "net.fabricmc" && it.name == "sponge-mixin"
-//                        || it.group == "org.spongepowered" && it.name == "mixin"
-//            }
-//        }
-//        .file.absolutePath
+val mixinAgent = configurations.register("mixinAgent") {
+    isCanBeConsumed = false
+    isTransitive = false
+}
 
-    listOf(
+val hotswapJvmArgs = mixinAgent.flatMap { it.elements }.map { files ->
+    listOfNotNull(
         "-XX:+AllowEnhancedClassRedefinition",
-//        "-javaagent:$mixinJar"
+        files.singleOrNull()?.let { "-javaagent:${it.asFile}" }
     )
 }
 extensions.add<Provider<List<String>>>("hotswapJvmArgs", hotswapJvmArgs)
