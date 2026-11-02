@@ -28,12 +28,11 @@ val hotswapJvmArgs = provider {
         .copyRecursive()
         .resolvedConfiguration
         .resolvedArtifacts
-        .first { it.moduleVersion.id.group == "net.fabricmc" && it.moduleVersion.id.name == "sponge-mixin" }
-        .file.absolutePath
+        .firstOrNull { it.moduleVersion.id.group == "net.fabricmc" && it.moduleVersion.id.name == "sponge-mixin" }
 
-    listOf(
+    listOfNotNull(
         "-XX:+AllowEnhancedClassRedefinition",
-        "-javaagent:$mixinJar"
+        mixinJar?.let { "-javaagent:${it.file.absolutePath}" }
     )
 }
 extensions.add<Provider<List<String>>>("hotswapJvmArgs", hotswapJvmArgs)
