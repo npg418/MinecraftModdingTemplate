@@ -32,7 +32,7 @@ neoForge {
                 prop("mod_id").get(),
                 "--all",
                 "--output",
-                file("src/generated/resources/").absolutePath,
+                file("src/main/generated/").absolutePath,
                 "--existing",
                 file("src/main/resources/").absolutePath
             )
@@ -54,6 +54,10 @@ neoForge {
             sourceSet(commonSrc)
         }
     }
+}
+
+sourceSets.main {
+    resources.srcDir("src/main/generated")
 }
 
 val generateModsToml = tasks.register<NeoForgeModsTomlTask>("generateModsToml") {
