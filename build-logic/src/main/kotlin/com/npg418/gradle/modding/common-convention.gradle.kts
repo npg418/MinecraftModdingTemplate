@@ -11,7 +11,9 @@ plugins {
 group = prop("mod_group_id").get()
 version = prop("mod_version").get()
 
-base.archivesName = prop("mod_id")
+val projectName = project.name
+
+base.archivesName = prop("mod_id").map { "$it-$projectName" }
 
 java {
     toolchain {
@@ -43,6 +45,19 @@ sourceSets.main {
 }
 extensions.add<Provider<Directory>>("generatedResourcesDir", generatedResourcesDir)
 
+if (project.path != ":common") {
+    val commonSrc = project(":common").sourceSets.main.get()
+    tasks {
+        named<Jar>("jar") {
+            from(commonSrc.output)
+        }
+        named<Jar>("sourcesJar") {
+            from(commonSrc.allSource)
+        }
+    }
+    extensions.add<SourceSet>("commonSrc", commonSrc)
+}
+
 idea {
     module {
         isDownloadJavadoc = true
@@ -50,7 +65,6 @@ idea {
     }
 }
 
-val modulePrefix = project.name
 tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions.moduleName.set("${modulePrefix}_$name")
+    compilerOptions.moduleName.set("${projectName}_$name")
 }

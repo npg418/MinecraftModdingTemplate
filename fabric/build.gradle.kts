@@ -31,7 +31,7 @@ loom {
     mods {
         register(prop("mod_id").get()) {
             sourceSet(sourceSets.main.get())
-            sourceSet(project(":common").sourceSets.main.get())
+            sourceSet(commonSrc)
         }
     }
 }
