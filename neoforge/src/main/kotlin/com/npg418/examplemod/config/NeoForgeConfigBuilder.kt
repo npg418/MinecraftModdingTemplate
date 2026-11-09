@@ -68,7 +68,7 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) : ConfigTreeWalker(LOG
         builder.defineEnum(name, p.default).bind(p)
 
     override fun <T : Comparable<T>> visit(name: String, p: RangedConfigProperty<T>) =
-        builder.defineInRange(name, p.default, p.range.start, p.range.endInclusive, p.type.java).bind(p)
+        builder.defineInRange(name, p.default, p.range.start, p.range.endInclusive, p.type.javaObjectType).bind(p)
 
     override fun <T : Any> visit(name: String, p: OneOfConfigProperty<T>) =
         builder.defineInList(name, p.default, p.allowedValues).bind(p)
