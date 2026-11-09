@@ -27,34 +27,35 @@ sealed class ConfigProperty<T : Any>(val default: T) {
     abstract fun <R> accept(name: String, visitor: ConfigPropertyVisitor<R>): R
 }
 
-class NormalConfigProperty<T : Any> @PublishedApi internal constructor(
+open class NormalConfigProperty<T : Any> @PublishedApi internal constructor(
     default: T, val type: KClass<T>, var validator: ((T) -> Boolean)? = null
 ) : ConfigProperty<T>(default) {
     override fun isValid(v: T): Boolean = validator?.invoke(v) ?: true
     override fun <R> accept(name: String, visitor: ConfigPropertyVisitor<R>) = visitor.visit(name, this)
 }
 
-class EnumConfigProperty<T : Enum<T>> internal constructor(default: T) : ConfigProperty<T>(default) {
-    override fun <R> accept(name: String, visitor: ConfigPropertyVisitor<R>): R = visitor.visit(name, this)
-}
-
 infix fun <T : Any> NormalConfigProperty<T>.withValidator(validator: (T) -> Boolean) = this.also {
     this.validator = validator
 }
 
+class EnumConfigProperty<T : Enum<T>> @PublishedApi internal constructor(default: T, type: KClass<T>) :
+    NormalConfigProperty<T>(default, type) {
+    override fun <R> accept(name: String, visitor: ConfigPropertyVisitor<R>): R = visitor.visit(name, this)
+}
+
 class OneOfConfigProperty<T : Any> internal constructor(
-    default: T, val allowedValues: Collection<T>
-) : ConfigProperty<T>(default) {
+    default: T, type: KClass<T>, val allowedValues: Collection<T>
+) : NormalConfigProperty<T>(default, type) {
     override fun isValid(v: T): Boolean = v in allowedValues
     override fun <R> accept(name: String, visitor: ConfigPropertyVisitor<R>): R = visitor.visit(name, this)
 }
 
 infix fun <T : Any> NormalConfigProperty<T>.oneOf(allowedValues: Collection<T>) =
-    OneOfConfigProperty(default, allowedValues)
+    OneOfConfigProperty(default, type, allowedValues)
 
 class RangedConfigProperty<T : Comparable<T>> internal constructor(
-    default: T, val type: KClass<T>, val range: ClosedRange<T>
-) : ConfigProperty<T>(default) {
+    default: T, type: KClass<T>, val range: ClosedRange<T>
+) : NormalConfigProperty<T>(default, type) {
     override fun isValid(v: T): Boolean = v in range
     override fun <R> accept(name: String, visitor: ConfigPropertyVisitor<R>): R = visitor.visit(name, this)
 }
