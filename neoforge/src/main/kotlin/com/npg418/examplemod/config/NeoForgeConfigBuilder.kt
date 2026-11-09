@@ -75,7 +75,10 @@ class NeoForgeConfigBuilder(private val spec: ConfigSpec) : ConfigTreeWalker(LOG
 
     override fun <E : Any> visit(name: String, p: ListConfigProperty<E>) {
         val v: (Any?) -> Boolean = { p.elementType.safeCast(it)?.let(p.elementValidator) ?: false }
-        if (p.allowEmpty) builder.defineListAllowEmpty(name, p.default, p.newElement, v)
-        else builder.defineList(name, p.default, p.newElement, v).bind(p)
+        if (p.allowEmpty) {
+            builder.defineListAllowEmpty(name, p.default, p.newElement, v)
+        } else {
+            builder.defineList(name, p.default, p.newElement, v)
+        }.bind(p)
     }
 }
