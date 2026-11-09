@@ -18,7 +18,8 @@ Common code shared between loaders lives in the `common` subproject; each loader
 ## Usage
 
 1. Replace `rootProject.name` in [settings.gradle.kts](./settings.gradle.kts) to individual project name
-2. Update the mod metadata in [gradle.properties](./gradle.properties) (`mod_id`, `mod_group_id`, `mod_name`, `mod_version`,
+2. Update the mod metadata in [gradle.properties](./gradle.properties) (`mod_id`, `mod_group_id`, `mod_name`,
+   `mod_version`,
    `mod_description`, etc.)
 3. Rename the base package (`com.npg418.examplemod`) across `common`, `neoforge`, and `fabric` to match your mod's
    package
@@ -56,8 +57,9 @@ Common code shared between loaders lives in the `common` subproject; each loader
 
 ## Version Catalog
 
-Dependency and plugin versions are organized into separated Version Catalogs under `gradle/` (`libs`, `neoforgeLibs`, `fabricLibs`). Convention plugins in `build-logic` apply shared configuration
-(Java toolchain, repositories, common dependencies) to each loader subproject to keep per-loader `build.gradle.kts`
+Dependency and plugin versions are organized into separated Version Catalogs under `gradle/` (`libs`, `neoforgeLibs`,
+`fabricLibs`). Convention plugins in `build-logic` apply shared configuration (Java toolchain, repositories, common
+dependencies) to each loader subproject to keep per-loader `build.gradle.kts`
 files minimal.
 
 ## License

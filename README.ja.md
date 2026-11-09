@@ -12,7 +12,8 @@
 - NeoForge（[ModDevGradle](https://github.com/neoforged/ModDevGradle) 経由）
 - Fabric（[Fabric Loom](https://github.com/FabricMC/fabric-loom) 経由）
 
-各ローダー間で共有されるコードは `common` サブプロジェクトに配置されています。各ローダーは `common` に依存する個別のサブプロジェクト（`neoforge`、`fabric`）を持ちます。
+各ローダー間で共有されるコードは `common` サブプロジェクトに配置されています。各ローダーは `common` に依存する個別のサブプロジェクト（
+`neoforge`、`fabric`）を持ちます。
 
 ## 使い方
 
@@ -53,7 +54,9 @@
 
 ## Version Catalog
 
-依存関係とプラグインのバージョンは `gradle/` 配下のVersion Catalogに分離して管理されており、ルートビルドや各サブプロジェクト、`build-logic` から利用されます。`build-logic` 内のコンベンションプラグインは、各ローダーサブプロジェクトに共通設定（Javaツールチェーン、リポジトリ、共通依存関係）を適用し、ローダーごとの`build.gradle.kts`を最小限に保ちます。
+依存関係とプラグインのバージョンは `gradle/` 配下のVersion Catalogに分離して管理されており、ルートビルドや各サブプロジェクト、
+`build-logic` から利用されます。`build-logic` 内のコンベンションプラグインは、各ローダーサブプロジェクトに共通設定（Javaツールチェーン、リポジトリ、共通依存関係）を適用し、ローダーごとの
+`build.gradle.kts`を最小限に保ちます。
 
 ## ライセンス
 
