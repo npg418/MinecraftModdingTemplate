@@ -11,9 +11,10 @@ plugins {
 group = prop("mod_group_id").get()
 version = prop("mod_version").get()
 
-val projectName = project.name
-
-base.archivesName = "${prop("mod_id").get()}-$projectName"
+base.archivesName = run {
+    val projectName = project.name
+    prop("mod_id").map { "$it-$projectName" }
+}
 
 java {
     toolchain {
@@ -66,5 +67,5 @@ idea {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions.moduleName.set("${projectName}_$name")
+    compilerOptions.moduleName.set("${project.name}_$name")
 }

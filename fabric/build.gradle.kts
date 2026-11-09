@@ -25,6 +25,7 @@ loom {
             appendProjectPathToDisplayName = false
 
             generateRunConfig = true
+            preferGradleTask = true
         }
     }
 
