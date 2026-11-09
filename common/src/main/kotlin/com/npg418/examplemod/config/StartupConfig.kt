@@ -7,6 +7,6 @@ object StartupConfig : ConfigSpec(ConfigType.STARTUP) {
     object Item {
         @Comment("Durability of Example Item")
         @GameRestart
-        var exampleItemDurability by definingInRange(64, 1..Int.MAX_VALUE)
+        var exampleItemDurability by entry(64) ranged 1..Int.MAX_VALUE
     }
 }
