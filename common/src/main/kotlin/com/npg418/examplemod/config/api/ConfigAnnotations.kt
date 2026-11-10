@@ -8,7 +8,7 @@ annotation class Name(val value: String)
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY)
 @MustBeDocumented
-annotation class Comment(val value: String)
+annotation class Comment(vararg val value: String)
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY)
 @MustBeDocumented
