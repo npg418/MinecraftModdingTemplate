@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.10"
+kotlin = "2.4.21"
 idea-ext = "1.4.1"
 nightconfig = "3.9.0"
 
@@ -21,8 +21,6 @@ parchment-mapping = "2024.11.17"
 sponge-mixin = "0.15.2+mixin.0.8.7"
 
 [plugins]
-#noinspection UnusedVersionCatalogEntry
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 idea-ext = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "idea-ext" }
 
 moddev-gradle = { id = "net.neoforged.moddev", version.ref = "moddev-gradle" }
@@ -30,6 +28,8 @@ fabric-loom = { id = "net.fabricmc.fabric-loom-remap", version.ref = "fabric-loo
 fabric-loom-companion = { id = "net.fabricmc.fabric-loom-companion", version.ref = "fabric-loom" }
 
 [libraries]
+kotlin-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+
 nightconfig-toml = { group = "com.electronwill.night-config", name = "toml", version.ref = "nightconfig" }
 
 minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft" }

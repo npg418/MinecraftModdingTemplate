@@ -1,10 +1,9 @@
 package com.npg418.gradle.modding
 
-import libs
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm")
     idea
 }
 
