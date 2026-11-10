@@ -7,7 +7,7 @@ object CommonConfig : ConfigSpec(ConfigType.COMMON) {
     @Comment("Greeting log settings")
     @Name("greeting")
     object Greeting {
-        @Comment("Whether log when title screen")
+        @Comment("Whether log when title screen", "false is not acceptable")
         var greetOnTitleScreen by entry(true) withValidator { it }
     }
 
